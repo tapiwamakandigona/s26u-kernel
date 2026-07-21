@@ -1,0 +1,128 @@
+name: Build S26U GKI
+
+# Builds the Android Common Kernel (ACK) android15-6.6 GKI for the itel S26 Ultra
+# (S688LN / Unisoc T7300 / ums9360). Runs on GitHub's FREE public runners because
+# Actions is billing-blocked on the private repo.
+#
+# profile:
+#   stock      - zero source/config changes. Pure ACK GKI. KMI 100% intact.
+#                THIS IS THE FIRST MILESTONE: it proves the checkout + Kleaf build
+#                + boot.img pack chain and produces a boot.img you `fastboot boot`
+#                (NOT flash) to confirm vendor modules still load.
+#   safe       - stock + KMI-SAFE tuning only: default TCP=bbr, zram default=zstd.
+#                No ABI/struct changes -> prebuilt vendor modules unaffected.
+#   aggressive - safe + ThinLTO + strip debug bloat (KASAN/KFENCE/lockup/
+#                sched_debug/ftrace/profiling). Bigger wins but CAN perturb the
+#                KMI -> the fastboot-boot probe is mandatory before trusting it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Build profile"
+        type: choice
+        options: [stock, safe, aggressive]
+        default: stock
+
+permissions:
+  contents: write
+
+env:
+  ACK_BRANCH: common-android15-6.6
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout CI repo
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Before:"; df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+                      /opt/hostedtoolcache/CodeQL /usr/local/.ghcup \
+                      /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" 2>/dev/null || true
+          sudo docker image prune --all --force 2>/dev/null || true
+          echo "After:"; df -h /
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            git curl python3 python3-pip zip unzip rsync bc bison flex \
+            libssl-dev libelf-dev ca-certificates
+          # `repo` tool
+          mkdir -p "$HOME/bin"
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/repo"
+          chmod a+x "$HOME/bin/repo"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+          git config --global user.email "ci@s26u.local"
+          git config --global user.name "S26U CI"
+
+      - name: Sync ACK ${{ env.ACK_BRANCH }} (shallow)
+        run: |
+          mkdir -p android-kernel && cd android-kernel
+          repo init --depth=1 -u https://android.googlesource.com/kernel/manifest -b "$ACK_BRANCH"
+          repo sync -c -j"$(nproc)" --no-tags --no-clone-bundle --fail-fast --optimized-fetch
+          echo "== tree =="; ls
+          echo "== GKI base version =="; head -3 common/Makefile
+
+      - name: Apply tuning profile (${{ inputs.profile }})
+        if: ${{ inputs.profile != 'stock' }}
+        run: |
+          bash "$GITHUB_WORKSPACE/scripts/apply_tuning.sh" "${{ inputs.profile }}" \
+               "$GITHUB_WORKSPACE/android-kernel/common"
+          echo "== resulting gki_defconfig tail =="
+          tail -30 android-kernel/common/arch/arm64/configs/gki_defconfig
+
+      - name: Build GKI (Kleaf)
+        run: |
+          cd android-kernel
+          # aggressive profile perturbs config -> don't let ABI strict mode hard-fail;
+          # the fastboot-boot probe is the real gate for module loading.
+          EXTRA=""
+          if [ "${{ inputs.profile }}" = "aggressive" ]; then
+            EXTRA="--kmi_symbol_list_strict_mode=false"
+          fi
+          # Primary path: Kleaf dist (produces Image, Image.lz4, boot.img, System.map).
+          if tools/bazel run $EXTRA //common:kernel_aarch64_dist -- \
+                --dist_dir="$GITHUB_WORKSPACE/dist"; then
+            echo "kleaf_ok=1" >> "$GITHUB_ENV"
+          else
+            echo "Kleaf dist target failed; trying gki artifacts target..."
+            tools/bazel run $EXTRA //common:kernel_aarch64_gki_artifacts_dist -- \
+                --dist_dir="$GITHUB_WORKSPACE/dist" || \
+            tools/bazel build $EXTRA //common:kernel_aarch64
+          fi
+
+      - name: Collect + pack boot image
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          echo "== dist contents =="; ls -la dist || true
+          mkdir -p out
+          # Copy the key artifacts if present
+          for f in Image Image.lz4 System.map vmlinux boot.img gki-info.txt abi_symbollist; do
+            [ -f "dist/$f" ] && cp "dist/$f" out/ && echo "collected $f"
+          done
+          # If Kleaf didn't emit a boot.img, build one from Image with mkbootimg.
+          # S26U is Android 15 (init_boot split) => boot.img carries ONLY the kernel,
+          # header v4, no ramdisk. init_boot + vendor_boot stay on the device.
+          if [ ! -f out/boot.img ] && [ -f out/Image ]; then
+            MKBOOT="$(find android-kernel -path '*tools/mkbootimg/mkbootimg.py' | head -1)"
+            if [ -n "$MKBOOT" ]; then
+              python3 "$MKBOOT" --header_version 4 --kernel out/Image \
+                --output out/boot.img && echo "packed boot.img (no-ramdisk, v4)"
+            fi
+          fi
+          echo "== out contents =="; ls -la out
+          ( cd out && sha256sum * > SHA256SUMS.txt; cat SHA256SUMS.txt )
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: s26u-gki-${{ inputs.profile }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 30

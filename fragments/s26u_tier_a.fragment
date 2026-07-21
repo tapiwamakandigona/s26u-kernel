@@ -1,0 +1,20 @@
+# S26U Tier-A tuning fragment (reference — the workflow applies these via
+# scripts/apply_tuning.sh, not this file directly). Grounded in the 2026-07-21
+# recon dump's stock kernel_config.gz (all VERIFIED).
+#
+# KMI-SAFE (safe + aggressive profiles):
+CONFIG_DEFAULT_BBR=y
+CONFIG_DEFAULT_TCP_CONG="bbr"          # stock: "cubic" (bbr already compiled in =y)
+CONFIG_ZRAM_DEF_COMP_ZSTD=y
+CONFIG_ZRAM_DEF_COMP="zstd"            # stock: "lzo-rle" (zstd already compiled in via CRYPTO_ZSTD=y)
+#
+# KMI-PERTURBING (aggressive profile only — fastboot-boot probe mandatory):
+CONFIG_LTO_CLANG_THIN=y               # stock: CONFIG_LTO_NONE=y
+# CONFIG_KASAN is not set             # stock: =y (+HW_TAGS, +VMALLOC)
+# CONFIG_KFENCE is not set            # stock: =y
+# CONFIG_LOCKUP_DETECTOR is not set   # stock: =y
+# CONFIG_SOFTLOCKUP_DETECTOR is not set # stock: =y
+# CONFIG_SCHED_DEBUG is not set       # stock: =y
+# CONFIG_FTRACE is not set            # stock: =y
+# CONFIG_FUNCTION_TRACER is not set   # stock: =y
+# CONFIG_PROFILING is not set         # stock: =y
