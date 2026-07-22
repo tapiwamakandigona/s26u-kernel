@@ -1,0 +1,560 @@
+============ S688LN KERNEL EVIDENCE ============
+Collected: Wed 07/22/2026 19:57:37.46
+
+=== uname -a ===
+Linux localhost 6.6.102-android15-8-g1481f357a31c-ab14794947-4k #1 SMP PREEMPT Wed Jan 28 17:42:19 UTC 2026 aarch64 Toybox
+=== /proc/version ===
+Linux version 6.6.102-android15-8-g1481f357a31c-ab14794947-4k (kleaf@build-host) (Android (11368308, +pgo, +bolt, +lto, +mlgo, based on r510928) clang version 18.0.0 (https://android.googlesource.com/toolchain/llvm-project 477610d4d0d988e69dbc3fae4fe86bff3f07f2b5), LLD 18.0.0) #1 SMP PREEMPT Wed Jan 28 17:42:19 UTC 2026
+=== slot / fingerprints ===
+_a
+itel/S688LN-OP/itel-S688LN:15/AP3A.240905.015.A2/170005:user/release-keys
+itel/S688LN-OP/itel-S688LN:15/AP3A.240905.015.A2/260421V8852DevT:user/release-keys
+
+=== /proc/modules ===
+ir_spi 20480 0 - Live 0x0000000000000000
+tran_util 57344 0 - Live 0x0000000000000000
+tran_health_sched 81920 0 - Live 0x0000000000000000
+trans_sched 167936 2 tran_health_sched, Live 0x0000000000000000
+tran_mm_collect 81920 0 - Live 0x0000000000000000
+sysdumpdb_switch 16384 0 - Live 0x0000000000000000
+thd 45056 1 - Live 0x0000000000000000
+irq_monitor 40960 0 - Live 0x0000000000000000
+stmvl53l8 57344 0 - Live 0x0000000000000000
+unisoc_freqlink 24576 0 - Live 0x0000000000000000
+unisoc_scufreq 40960 0 - Live 0x0000000000000000
+tmsnfc 61440 0 - Live 0x0000000000000000
+sprd_power_volt_snr 45056 0 [permanent], Live 0x0000000000000000
+sprd_suspend_helper 12288 0 - Live 0x0000000000000000
+sprd_pdbg 45056 0 - Live 0x0000000000000000
+mmdvfs 163840 0 - Live 0x0000000000000000
+sprd_camera 1867776 0 - Live 0x0000000000000000
+sprd_sensor 131072 1 sprd_camera, Live 0x0000000000000000
+flash_ic_ocp8137 20480 0 - Live 0x0000000000000000
+cpufreq_userspace 20480 0 - Live 0x0000000000000000
+sprd_flash_drv 53248 1 flash_ic_ocp8137, Live 0x0000000000000000
+tran_ldo 16384 0 - Live 0x0000000000000000
+sprd_camsys_pw_domain 24576 3 mmdvfs,sprd_camera,sprd_sensor, Live 0x0000000000000000
+uniber 32768 0 - Live 0x0000000000000000
+unisoc_fsio 90112 0 - Live 0x0000000000000000
+kprobe_iomonitor 24576 0 - Live 0x0000000000000000
+iolimit 24576 0 [permanent], Live 0x0000000000000000
+sla_core 24576 0 - Live 0x0000000000000000
+unisoc_mm_reclaim 40960 0 - Live 0x0000000000000000
+zram 159744 2 - Live 0x0000000000000000
+zsmalloc 45056 1 zram, Live 0x0000000000000000
+chipsemi_chsc5xxx 225280 0 - Live 0x0000000000000000
+focaltech_ft3683g 225280 0 - Live 0x0000000000000000
+adaptive_ts 69632 2 chipsemi_chsc5xxx,focaltech_ft3683g, Live 0x0000000000000000
+goodix_gt9916_i2c_ts 167936 0 - Live 0x0000000000000000
+nvt_nt36xxx_spi_ts 45056 0 - Live 0x0000000000000000
+focaltech_ft3680_spi_ts 122880 0 - Live 0x0000000000000000
+trusty_tui 20480 2 nvt_nt36xxx_spi_ts,focaltech_ft3680_spi_ts, Live 0x0000000000000000
+sprd_fm 94208 0 - Live 0x0000000000000000
+sprdbt_tty 65536 2 - Live 0x0000000000000000
+sprd_wlan_combo 618496 0 - Live 0x0000000000000000
+cfg80211 1114112 1 sprd_wlan_combo, Live 0x0000000000000000
+unisoc_multi_control 12288 0 - Live 0x0000000000000000
+unisoc_gnss_pmnotify_ctl 12288 0 - Live 0x0000000000000000
+unisoc_gnss_dbg 24576 1 - Live 0x0000000000000000
+unisoc_gnss_common_ctl_all 24576 1 unisoc_gnss_pmnotify_ctl, Live 0x0000000000000000
+unisoc_wcn_bsp 540672 4 sprd_fm,sprdbt_tty,sprd_wlan_combo,unisoc_gnss_common_ctl_all, Live 0x0000000000000000
+sprd_touchscreen_ts 20480 3 goodix_gt9916_i2c_ts,nvt_nt36xxx_spi_ts,focaltech_ft3680_spi_ts, Live 0x0000000000000000
+sprd_pmic_dump 16384 0 - Live 0x0000000000000000
+sprd_7sreset 16384 0 - Live 0x0000000000000000
+sprd_pub_vsr 36864 0 - Live 0x0000000000000000
+dmc_drv 28672 0 - Live 0x0000000000000000
+haptic 110592 0 - Live 0x0000000000000000
+sprd_ddr_dvfs 86016 1 unisoc_freqlink, Live 0x0000000000000000
+sprd_cp_dvfs 32768 0 - Live 0x0000000000000000
+audio_platform 208896 5 - Live 0x0000000000000000
+audio_dai 102400 2 - Live 0x0000000000000000
+audio_codec 262144 39 - Live 0x0000000000000000
+tran_audio_aw87xxx 147456 0 - Live 0x0000000000000000
+tran_audio_hl1280 20480 1 audio_codec, Live 0x0000000000000000
+audio_card 77824 7 audio_platform,audio_codec,tran_audio_aw87xxx, Live 0x0000000000000000
+audio_misc 425984 17 audio_platform,audio_dai,audio_card, Live 0x0000000000000000
+musb_sprd 57344 0 - Live 0x0000000000000000
+ums9360_serdes 16384 0 - Live 0x0000000000000000
+mipiserdes_base 24576 1 ums9360_serdes, Live 0x0000000000000000
+sprd_vibra 12288 0 - Live 0x0000000000000000
+tc_otg_ctrl 16384 0 - Live 0x0000000000000000
+tc_auto_test 24576 0 - Live 0x0000000000000000
+tc_chg_type_det 36864 0 - Live 0x0000000000000000
+tc_pd_adapter 20480 0 - Live 0x0000000000000000
+tc_tcpc 20480 0 - Live 0x0000000000000000
+tran_usb_ctrl 36864 0 - Live 0x0000000000000000
+tc_pd_algo 24576 0 - Live 0x0000000000000000
+tc_hvdcp20_algo 28672 0 - Live 0x0000000000000000
+tc_tc30_algo 24576 0 - Live 0x0000000000000000
+tc_pmic 12288 0 - Live 0x0000000000000000
+tc_ta_class 20480 1 tran_usb_ctrl, Live 0x0000000000000000
+tc_gauge 32768 0 - Live 0x0000000000000000
+tc_lcd_notify 12288 0 - Live 0x0000000000000000
+tc_battery 36864 0 - Live 0x0000000000000000
+tc_temp_forecast 12288 0 - Live 0x0000000000000000
+tc_ambient_temp_det 20480 0 - Live 0x0000000000000000
+tc_charger_framework 131072 5 tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_ambient_temp_det, Live 0x0000000000000000
+tc_misc_intf 49152 14 tc_otg_ctrl,tc_auto_test,tc_chg_type_det,tc_pd_adapter,tc_tcpc,tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_gauge,tc_battery,tc_temp_forecast,tc_ambient_temp_det,tc_charger_framework, Live 0x0000000000000000
+jpg 49152 0 - Live 0x0000000000000000
+tc_tcpc_vdd 12288 1 - Live 0x0000000000000000
+tc_sc8950 45056 0 - Live 0x0000000000000000
+usb_phy_sprd_hs 45056 6 tc_misc_intf, Live 0x0000000000000000
+sprd_bc1p2 28672 1 usb_phy_sprd_hs, Live 0x0000000000000000
+musb_hdrc 192512 3 audio_misc,musb_sprd,usb_phy_sprd_hs, Live 0x0000000000000000
+aw35615_whole 184320 2 tc_pd_adapter,tc_tcpc, Live 0x0000000000000000
+sc27xx_pd 45056 0 - Live 0x0000000000000000
+sc27xx_typec 28672 1 tc_otg_ctrl, Live 0x0000000000000000
+sprd_tcpm 122880 4 tc_pd_adapter,tc_tcpc,sc27xx_pd,sc27xx_typec, Live 0x0000000000000000
+tc_tcpc_notifier 20480 6 tc_otg_ctrl,tc_chg_type_det,tc_pd_adapter,tc_tcpc,tc_charger_framework,tc_tcpc_vdd, Live 0x0000000000000000
+tc_algorithm_class 28672 6 tc_auto_test,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_charger_framework,tc_misc_intf, Live 0x0000000000000000
+tc_adapter_class 20480 6 tc_otg_ctrl,tc_pd_adapter,tc_pd_algo,tc_misc_intf,aw35615_whole,sc27xx_pd, Live 0x0000000000000000
+tc_charger_class 57344 15 tc_otg_ctrl,tc_auto_test,tc_chg_type_det,tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_gauge,tc_battery,tc_temp_forecast,tc_ambient_temp_det,tc_charger_framework,tc_misc_intf,tc_tcpc_vdd,tc_sc8950, Live 0x0000000000000000
+ump965x_fuel_gauge 106496 0 - Live 0x0000000000000000
+sprd_battery_info 28672 1 ump965x_fuel_gauge, Live 0x0000000000000000
+tc_common_class 24576 20 tc_otg_ctrl,tc_auto_test,tc_chg_type_det,tc_tcpc,tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_pmic,tc_gauge,tc_lcd_notify,tc_battery,tc_temp_forecast,tc_ambient_temp_det,tc_charger_framework,tc_misc_intf,sprd_bc1p2,aw35615_whole,sprd_tcpm,ump965x_fuel_gauge, Live 0x0000000000000000
+sprd_third_battery_fuel 12288 0 - Live 0x0000000000000000
+sprd_bcl 12288 0 - Live 0x0000000000000000
+sprd_core_ctrl 12288 0 - Live 0x0000000000000000
+sprd_freq_limit 20480 0 - Live 0x0000000000000000
+sprd_usbpinmux 20480 2 musb_sprd,usb_phy_sprd_hs, Live 0x0000000000000000
+sprd_dpdm 12288 0 - Live 0x0000000000000000
+extcon_usb_gpio 12288 0 - Live 0x0000000000000000
+sprd_uid 12288 0 - Live 0x0000000000000000
+sprd_pmic_wdt 12288 0 - Live 0x0000000000000000
+sprd_virt_thm 12288 0 - Live 0x0000000000000000
+sprd_shell_thm 16384 0 - Live 0x0000000000000000
+sprd_ambient_thm 12288 0 - Live 0x0000000000000000
+thermal_generic_adc 12288 0 - Live 0x0000000000000000
+sc27xx_poweroff 16384 0 - Live 0x0000000000000000
+sprd_leds_bltc 12288 0 - Live 0x0000000000000000
+ledtrig_pattern 12288 0 - Live 0x0000000000000000
+vpu 77824 0 - Live 0x0000000000000000
+sprd_vsp_pw_domain 16384 0 - Live 0x0000000000000000
+sprd_faceid 16384 0 - Live 0x0000000000000000
+sprd_map 24576 0 - Live 0x0000000000000000
+system_heap 24576 330 [permanent], Live 0x0000000000000000
+unisoc_userlog 16384 4 - Live 0x0000000000000000
+cma_heap 24576 0 [permanent], Live 0x0000000000000000
+ion_ipc_trusty 24576 1 cma_heap, Live 0x0000000000000000
+sprd_dmabuf 32768 1 sprd_camera, Live 0x0000000000000000
+sprd_pmic_syscon 16384 0 - Live 0x0000000000000000
+sprd_pmic_adc 57344 0 - Live 0x0000000000000000
+sprd_coresight_apetb_main 12288 0 - Live 0x0000000000000000
+sprd_coresight_apetb_ctrl 16384 1 sprd_coresight_apetb_main, Live 0x0000000000000000
+sprd_coresight_etm4x 86016 1 sprd_coresight_apetb_ctrl, Live 0x0000000000000000
+sprd_coresight_replicator 24576 0 - Live 0x0000000000000000
+sprd_coresight_funnel 24576 0 - Live 0x0000000000000000
+sprd_coresight_tmc 53248 1 sprd_coresight_apetb_ctrl, Live 0x0000000000000000
+sprd_coresight 94208 5 sprd_coresight_apetb_main,sprd_coresight_etm4x,sprd_coresight_replicator,sprd_coresight_funnel,sprd_coresight_tmc, Live 0x0000000000000000
+unisoc_aphang 49152 0 - Live 0x0000000000000000
+pinctrl 16384 0 - Live 0x0000000000000000
+goodix_fp 36864 3 - Live 0x0000000000000000
+sprd_drm 954368 6 unisoc_mm_reclaim,adaptive_ts,nvt_nt36xxx_spi_ts,goodix_fp, Live 0x0000000000000000
+tran_key_bigdata 20480 1 sprd_drm, Live 0x0000000000000000
+sprd_gsp 376832 1 sprd_drm, Live 0x0000000000000000
+apsys_dvfs 270336 4 jpg,vpu,sprd_drm,sprd_gsp, Live 0x0000000000000000
+unisoc_iommu 94208 6 sprd_camera,jpg,vpu,system_heap,sprd_drm,sprd_gsp, Live 0x0000000000000000
+gpio 16384 0 - Live 0x0000000000000000
+core 16384 2 pinctrl,gpio, Live 0x0000000000000000
+sprd_ump9360_tsensor 20480 1 unisoc_gnss_common_ctl_all, Live 0x0000000000000000
+sgd 12288 0 - Live 0x0000000000000000
+kts_sync 12288 0 - Live 0x0000000000000000
+mali_kbase 1155072 109 - Live 0x0000000000000000 (O)
+sprd_cpu_cooling 40960 0 - Live 0x0000000000000000
+unisoc_last_kmsg 53248 1 unisoc_aphang, Live 0x0000000000000000
+unisoc_mm_emem 28672 3 zram,system_heap,mali_kbase, Live 0x0000000000000000
+unisoc_mm_ummd 16384 0 - Live 0x0000000000000000
+sprd_shm 24576 0 - Live 0x0000000000000000
+unisoc_bootinfo 24576 0 - Live 0x0000000000000000
+trusty_virtio 24576 0 - Live 0x0000000000000000
+trusty_ipc 49152 27 sprd_camera,unisoc_wcn_bsp,ion_ipc_trusty, Live 0x0000000000000000
+trusty_irq 28672 0 - Live 0x0000000000000000
+trusty_log 28672 0 - Live 0x0000000000000000
+trusty_pm 16384 0 [permanent], Live 0x0000000000000000
+trusty 36864 8 sprd_drm,sprd_gsp,mali_kbase,sprd_shm,trusty_virtio,trusty_irq,trusty_log,trusty_pm, Live 0x0000000000000000
+rfkill 36864 2 sprdbt_tty,cfg80211, Live 0x0000000000000000
+r8153_ecm 12288 0 - Live 0x0000000000000000
+cdc_ncm 32768 0 - Live 0x0000000000000000
+cdc_eem 12288 0 - Live 0x0000000000000000
+cdc_ether 20480 2 r8153_ecm,cdc_ncm, Live 0x0000000000000000
+ax88179_178a 40960 0 - Live 0x0000000000000000
+rtl8150 24576 0 - Live 0x0000000000000000
+r8152 155648 1 r8153_ecm, Live 0x0000000000000000
+asix 45056 0 - Live 0x0000000000000000
+usbnet 53248 6 r8153_ecm,cdc_ncm,cdc_eem,cdc_ether,ax88179_178a,asix, Live 0x0000000000000000
+mii 24576 4 ax88179_178a,r8152,asix,usbnet, Live 0x0000000000000000
+trangpio 20480 0 - Live 0x0000000000000000
+tkv_recovery 53248 0 - Live 0x0000000000000000
+tkv 53248 0 - Live 0x0000000000000000
+tran_rhi 24576 0 - Live 0x0000000000000000
+hiber 28672 1 - Live 0x0000000000000000
+tran_hwinfo 16384 3 adaptive_ts,goodix_fp,sprd_drm,[permanent], Live 0x0000000000000000
+tranbootprof 24576 0 - Live 0x0000000000000000
+kprobe_dmverity_debug 16384 0 [permanent], Live 0x0000000000000000
+sprd_usb_f_rndis 49152 2 - Live 0x0000000000000000
+sprd_usb_f_serial 20480 16 - Live 0x0000000000000000
+sprd_u_serial 36864 5 sprd_usb_f_serial, Live 0x0000000000000000
+sprd_wdt_fiq 24576 1 unisoc_aphang, Live 0x0000000000000000
+pwm_sprd 20480 0 - Live 0x0000000000000000
+sensorhub 40960 3 - Live 0x0000000000000000
+sensorhub_sipc 28672 1 sensorhub, Live 0x0000000000000000
+dfi_core 36864 0 - Live 0x0000000000000000
+ims_bridge 102400 0 - Live 0x0000000000000000
+seth 36864 0 - Live 0x0000000000000000
+kfifo_buf 20480 1 sensorhub, Live 0x0000000000000000
+slog_bridge 24576 0 - Live 0x0000000000000000
+sprd_iq 24576 0 - Live 0x0000000000000000
+sprd_usb_f_vser 45056 4 slog_bridge,sprd_iq, Live 0x0000000000000000
+sprd_cp_dump 20480 0 - Live 0x0000000000000000
+sprd_modem_loader 36864 1 - Live 0x0000000000000000
+sipx 45056 1 seth, Live 0x0000000000000000
+spool 24576 0 - Live 0x0000000000000000
+spipe 20480 19 - Live 0x0000000000000000
+sipc_core 180224 18 sprd_pdbg,sprd_fm,sprdbt_tty,sprd_wlan_combo,unisoc_wcn_bsp,sprd_ddr_dvfs,sprd_cp_dvfs,sprd_pmic_wdt,sprd_drm,sensorhub_sipc,ims_bridge,seth,slog_bridge,sprd_iq,sprd_modem_loader,sipx,spool,spipe, Live 0x0000000000000000
+sprd_sipc_virt_bus 12288 0 - Live 0x0000000000000000
+unisoc_mailbox 36864 6 sipc_core,[permanent], Live 0x0000000000000000
+sprd_trng 20480 0 - Live 0x0000000000000000
+sprd_power_manager 36864 2 sprd_modem_loader,sipc_core, Live 0x0000000000000000
+unisoc_time_sync 24576 3 sprd_pdbg,sensorhub, Live 0x0000000000000000
+timer_sprd 24576 0 [permanent], Live 0x0000000000000000
+pinctrl_sprd_ums9360 40960 0 - Live 0x0000000000000000
+pinctrl_sprd 28672 1 pinctrl_sprd_ums9360, Live 0x0000000000000000
+sprd_cpufreq_v2 45056 0 [permanent], Live 0x0000000000000000
+sprd_ase_generic 12288 0 [permanent], Live 0x0000000000000000
+sprd_ase_driver 36864 0 [permanent], Live 0x0000000000000000
+sprd_soc_thm 57344 1 sprd_cpufreq_v2, Live 0x0000000000000000
+sprd_thm_r5p0 24576 0 - Live 0x0000000000000000
+sdhci_sprd 208896 2 unisoc_fsio,unisoc_wcn_bsp, Live 0x0000000000000000
+cqhci 102400 2 unisoc_fsio,sdhci_sprd, Live 0x0000000000000000
+mmc_hsq 20480 1 sdhci_sprd, Live 0x0000000000000000
+mmc_swcq 49152 1 sdhci_sprd, Live 0x0000000000000000
+ufs_sprd 278528 1 unisoc_fsio, Live 0x0000000000000000
+tran_proc_bootdevice_mod 36864 1 ufs_sprd, Live 0x0000000000000000
+tnek 20480 11 tran_util,tran_health_sched,tran_mm_collect,thd,adaptive_ts,unisoc_wcn_bsp,tran_key_bigdata,trusty_ipc,trusty_log,ufs_sprd, Live 0x0000000000000000
+transsion_trancare 53248 16 tran_util,tran_health_sched,tran_mm_collect,thd,zram,adaptive_ts,unisoc_wcn_bsp,tc_charger_framework,tran_key_bigdata,trusty_ipc,trusty_log,ufs_sprd, Live 0x0000000000000000
+rpmb 32768 1 ufs_sprd, Live 0x0000000000000000
+ump9360_regulator 49152 32 - Live 0x0000000000000000
+nvmem_sprd_shadow_efuse 20480 1 - Live 0x0000000000000000
+nvmem_sprd_efuse 20480 0 - Live 0x0000000000000000
+spi_sprd 32768 0 - Live 0x0000000000000000
+sprd_soc_id 20480 2 unisoc_wcn_bsp,apsys_dvfs, Live 0x0000000000000000
+unisoc_sched 217088 6 trans_sched,unisoc_mm_reclaim,sprd_core_ctrl,sprd_cpu_cooling,[permanent], Live 0x0000000000000000
+i2c_sprd 32768 0 - Live 0x0000000000000000
+sprd_dma 32768 0 - Live 0x0000000000000000
+gpio_pmic_eic_sprd 12288 10 - Live 0x0000000000000000
+gpio_eic_sprd 28672 6 - Live 0x0000000000000000
+gpio_sprd 20480 24 - Live 0x0000000000000000
+rtc_sc27xx 20480 1 - Live 0x0000000000000000
+sprd_pmic_mfd 16384 0 - Live 0x0000000000000000
+unisoc_pmu_sample 36864 3 unisoc_freqlink,unisoc_scufreq,unisoc_sched, Live 0x0000000000000000
+sprd_spi_adi 28672 0 - Live 0x0000000000000000
+native_hang_monitor 36864 2 - Live 0x0000000000000000
+sprd_cache_print 16384 0 - Live 0x0000000000000000
+sysdump 118784 15 dmc_drv,sprd_ddr_dvfs,unisoc_aphang,unisoc_last_kmsg,trusty_log,sprd_wdt_fiq,sprd_cp_dump,sipc_core,ufs_sprd,ump9360_regulator,sprd_pmic_mfd,sprd_spi_adi,native_hang_monitor, Live 0x0000000000000000
+sprd_hwspinlock 20480 2 - Live 0x0000000000000000
+ums9360_clk 122880 192 - Live 0x0000000000000000
+sprd_sip_svc 24576 6 sprd_pdbg,sprd_pmic_wdt,unisoc_aphang,mali_kbase,unisoc_bootinfo,sprd_cpufreq_v2,[permanent], Live 0x0000000000000000
+clk_sprd 28672 1 ums9360_clk, Live 0x0000000000000000
+debug_symbol 16384 3 irq_monitor,unisoc_last_kmsg,sysdump,[permanent], Live 0x0000000000000000
+regmap_hook 16384 0 [permanent], Live 0x0000000000000000
+printk_cpuid 16384 0 - Live 0x0000000000000000
+
+=== /sys/module wcn-sprd-wlan entries ===
+clk_sprd
+gpio_eic_sprd
+gpio_pmic_eic_sprd
+gpio_sprd
+i2c_sprd
+musb_sprd
+nvmem_sprd_efuse
+nvmem_sprd_shadow_efuse
+pinctrl_sprd
+pinctrl_sprd_ums9360
+pwm_sprd
+sdhci_sprd
+spi_sprd
+sprd_7sreset
+sprd_ambient_thm
+sprd_ase_driver
+sprd_ase_generic
+sprd_battery_info
+sprd_bc1p2
+sprd_bcl
+sprd_cache_print
+sprd_camera
+sprd_camsys_pw_domain
+sprd_core_ctrl
+sprd_coresight
+sprd_coresight_apetb_ctrl
+sprd_coresight_apetb_main
+sprd_coresight_etm4x
+sprd_coresight_funnel
+sprd_coresight_replicator
+sprd_coresight_tmc
+sprd_cp_dump
+sprd_cp_dvfs
+sprd_cpu_cooling
+sprd_cpufreq_v2
+sprd_ddr_dvfs
+sprd_dma
+sprd_dmabuf
+sprd_dpdm
+sprd_drm
+sprd_faceid
+sprd_flash_drv
+sprd_fm
+sprd_freq_limit
+sprd_gsp
+sprd_hwspinlock
+sprd_iq
+sprd_leds_bltc
+sprd_map
+sprd_modem_loader
+sprd_pdbg
+sprd_pmic_adc
+sprd_pmic_dump
+sprd_pmic_mfd
+sprd_pmic_syscon
+sprd_pmic_wdt
+sprd_power_manager
+sprd_power_volt_snr
+sprd_pub_vsr
+sprd_sensor
+sprd_shell_thm
+sprd_shm
+sprd_sip_svc
+sprd_sipc_virt_bus
+sprd_soc_id
+sprd_soc_thm
+sprd_spi_adi
+sprd_suspend_helper
+sprd_tcpm
+sprd_third_battery_fuel
+sprd_thm_r5p0
+sprd_touchscreen_ts
+sprd_trng
+sprd_u_serial
+sprd_uid
+sprd_ump9360_tsensor
+sprd_usb_f_rndis
+sprd_usb_f_serial
+sprd_usb_f_vser
+sprd_usbpinmux
+sprd_vibra
+sprd_virt_thm
+sprd_vsp_pw_domain
+sprd_wdt_fiq
+sprd_wlan_combo
+sprdbt_tty
+timer_sprd
+ufs_sprd
+unisoc_wcn_bsp
+usb_phy_sprd_hs
+
+=== vendor module files ===
+lrw-r--r-- 1 root root 24 2026-04-21 12:36 /vendor/lib/modules -> /vendor_dlkm/lib/modules
+
+/vendor_dlkm:
+total 8
+drwxr-xr-x 2 root root 127 2009-01-01 02:00 etc
+drwxr-xr-x 3 root root  46 2009-01-01 02:00 lib
+
+/vendor_dlkm/etc:
+total 40
+-rw-r--r-- 1 root root 36597 2009-01-01 02:00 NOTICE.xml.gz
+-rw-r--r-- 1 root root   869 2009-01-01 02:00 build.prop
+-rw-r--r-- 1 root root     0 2009-01-01 02:00 fs_config_dirs
+-rw-r--r-- 1 root root     0 2009-01-01 02:00 fs_config_files
+
+/vendor_dlkm/lib:
+total 8
+drwxr-xr-x 2 root root 5173 2009-01-01 02:00 modules
+
+/vendor_dlkm/lib/modules:
+total 10152
+-rw-r--r-- 1 root root  151576 2009-01-01 02:00 adaptive-ts.ko
+-rw-r--r-- 1 root root  518200 2009-01-01 02:00 apsys-dvfs.ko
+-rw-r--r-- 1 root root  138192 2009-01-01 02:00 audio-card.ko
+-rw-r--r-- 1 root root  506664 2009-01-01 02:00 audio-codec.ko
+-rw-r--r-- 1 root root  179968 2009-01-01 02:00 audio-dai.ko
+-rw-r--r-- 1 root root  824984 2009-01-01 02:00 audio-misc.ko
+-rw-r--r-- 1 root root  365528 2009-01-01 02:00 audio-platform.ko
+-rw-r--r-- 1 root root  371032 2009-01-01 02:00 aw35615_whole.ko
+-rw-r--r-- 1 root root 2044104 2009-01-01 02:00 cfg80211.ko
+-rw-r--r-- 1 root root  425552 2009-01-01 02:00 chipsemi_chsc5xxx.ko
+-rw-r--r-- 1 root root   44936 2009-01-01 02:00 cma_heap.ko
+-rw-r--r-- 1 root root   19496 2009-01-01 02:00 core.ko
+-rw-r--r-- 1 root root   20880 2009-01-01 02:00 cpufreq_userspace.ko
+-rw-r--r-- 1 root root   41272 2009-01-01 02:00 dmc_drv.ko
+-rw-r--r-- 1 root root   19968 2009-01-01 02:00 extcon-usb-gpio.ko
+-rw-r--r-- 1 root root   31264 2009-01-01 02:00 flash_ic_ocp8137.ko
+-rw-r--r-- 1 root root  274480 2009-01-01 02:00 focaltech_ft3680_spi_ts.ko
+-rw-r--r-- 1 root root  487496 2009-01-01 02:00 focaltech_ft3683g.ko
+-rw-r--r-- 1 root root   61280 2009-01-01 02:00 goodix_fp.ko
+-rw-r--r-- 1 root root  336264 2009-01-01 02:00 goodix_gt9916_i2c_ts.ko
+-rw-r--r-- 1 root root   17496 2009-01-01 02:00 gpio.ko
+-rw-r--r-- 1 root root  232368 2009-01-01 02:00 haptic.ko
+-rw-r--r-- 1 root root   42136 2009-01-01 02:00 hiber.ko
+-rw-r--r-- 1 root root      67 2009-01-01 02:00 init.insmod.cfg
+-rw-r--r-- 1 root root   31520 2009-01-01 02:00 iolimit.ko
+-rw-r--r-- 1 root root   24136 2009-01-01 02:00 ion_ipc_trusty.ko
+-rw-r--r-- 1 root root   22344 2009-01-01 02:00 ir-spi.ko
+-rw-r--r-- 1 root root   60960 2009-01-01 02:00 irq_monitor.ko
+-rw-r--r-- 1 root root   89096 2009-01-01 02:00 jpg.ko
+-rw-r--r-- 1 root root   19192 2009-01-01 02:00 kfifo_buf.ko
+-rw-r--r-- 1 root root   26296 2009-01-01 02:00 kprobe_filemap.ko
+-rw-r--r-- 1 root root   33808 2009-01-01 02:00 kprobe_iomonitor.ko
+-rw-r--r-- 1 root root   13808 2009-01-01 02:00 kts_sync.ko
+-rw-r--r-- 1 root root   21752 2009-01-01 02:00 ledtrig-pattern.ko
+-rw-r--r-- 1 root root 2015096 2009-01-01 02:00 mali_kbase.ko
+-rw-r--r-- 1 root root   29472 2009-01-01 02:00 mipiserdes_base.ko
+-rw-r--r-- 1 root root  347352 2009-01-01 02:00 mmdvfs.ko
+-rw-r--r-- 1 root root   23260 2009-01-01 02:00 modules.alias
+-rw-r--r-- 1 root root   20145 2009-01-01 02:00 modules.dep
+-rw-r--r-- 1 root root    2825 2009-01-01 02:00 modules.load
+-rw-r--r-- 1 root root    1719 2009-01-01 02:00 modules.load.cali
+-rw-r--r-- 1 root root    1276 2009-01-01 02:00 modules.load.charger
+-rw-r--r-- 1 root root     100 2009-01-01 02:00 modules.softdep
+-rw-r--r-- 1 root root  340512 2009-01-01 02:00 musb_hdrc.ko
+-rw-r--r-- 1 root root  128968 2009-01-01 02:00 musb_sprd.ko
+-rw-r--r-- 1 root root  102816 2009-01-01 02:00 nvt_nt36xxx_spi_ts.ko
+-rw-r--r-- 1 root root   16448 2009-01-01 02:00 pinctrl.ko
+-rw-r--r-- 1 root root   37768 2009-01-01 02:00 rtc-sc27xx.ko
+-rw-r--r-- 1 root root   26016 2009-01-01 02:00 sc27xx-poweroff.ko
+-rw-r--r-- 1 root root  110432 2009-01-01 02:00 sc27xx_pd.ko
+-rw-r--r-- 1 root root   54832 2009-01-01 02:00 sc27xx_typec.ko
+-rw-r--r-- 1 root root   68568 2009-01-01 02:00 sensorhub.ko
+-rw-r--r-- 1 root root   41160 2009-01-01 02:00 sensorhub_sipc.ko
+-rw-r--r-- 1 root root   19488 2009-01-01 02:00 sgd.ko
+-rw-r--r-- 1 root root   30816 2009-01-01 02:00 sla_core.ko
+-rw-r--r-- 1 root root   47272 2009-01-01 02:00 sprd-bc1p2.ko
+-rw-r--r-- 1 root root   51656 2009-01-01 02:00 sprd-dmabuf.ko
+-rw-r--r-- 1 root root 1673824 2009-01-01 02:00 sprd-drm.ko
+-rw-r--r-- 1 root root  755816 2009-01-01 02:00 sprd-gsp.ko
+-rw-r--r-- 1 root root   21232 2009-01-01 02:00 sprd-leds-bltc.ko
+-rw-r--r-- 1 root root   30320 2009-01-01 02:00 sprd-pmic-syscon.ko
+-rw-r--r-- 1 root root   19464 2009-01-01 02:00 sprd-vibra.ko
+-rw-r--r-- 1 root root   21528 2009-01-01 02:00 sprd-vsp-pw-domain.ko
+-rw-r--r-- 1 root root   24112 2009-01-01 02:00 sprd_7sreset.ko
+-rw-r--r-- 1 root root   21032 2009-01-01 02:00 sprd_ambient_thm.ko
+-rw-r--r-- 1 root root   47792 2009-01-01 02:00 sprd_battery_info.ko
+-rw-r--r-- 1 root root   24792 2009-01-01 02:00 sprd_bcl.ko
+-rw-r--r-- 1 root root 3652136 2009-01-01 02:00 sprd_camera.ko
+-rw-r--r-- 1 root root   43760 2009-01-01 02:00 sprd_camsys_pw_domain.ko
+-rw-r--r-- 1 root root   20888 2009-01-01 02:00 sprd_core_ctrl.ko
+-rw-r--r-- 1 root root   18816 2009-01-01 02:00 sprd_coresight-apetb-ctrl.ko
+-rw-r--r-- 1 root root   15872 2009-01-01 02:00 sprd_coresight-apetb-main.ko
+-rw-r--r-- 1 root root  146560 2009-01-01 02:00 sprd_coresight-etm4x.ko
+-rw-r--r-- 1 root root   32360 2009-01-01 02:00 sprd_coresight-funnel.ko
+-rw-r--r-- 1 root root   32712 2009-01-01 02:00 sprd_coresight-replicator.ko
+-rw-r--r-- 1 root root   93560 2009-01-01 02:00 sprd_coresight-tmc.ko
+-rw-r--r-- 1 root root  163560 2009-01-01 02:00 sprd_coresight.ko
+-rw-r--r-- 1 root root   63024 2009-01-01 02:00 sprd_cp_dvfs.ko
+-rw-r--r-- 1 root root   69776 2009-01-01 02:00 sprd_cpu_cooling.ko
+-rw-r--r-- 1 root root   42528 2009-01-01 02:00 sprd_cpu_usage.ko
+-rw-r--r-- 1 root root  153240 2009-01-01 02:00 sprd_ddr_dvfs.ko
+-rw-r--r-- 1 root root   24344 2009-01-01 02:00 sprd_dpdm.ko
+-rw-r--r-- 1 root root   19288 2009-01-01 02:00 sprd_faceid.ko
+-rw-r--r-- 1 root root   87256 2009-01-01 02:00 sprd_flash_drv.ko
+-rw-r--r-- 1 root root  203184 2009-01-01 02:00 sprd_fm.ko
+-rw-r--r-- 1 root root   30120 2009-01-01 02:00 sprd_freq_limit.ko
+-rw-r--r-- 1 root root   22600 2009-01-01 02:00 sprd_map.ko
+-rw-r--r-- 1 root root   93088 2009-01-01 02:00 sprd_pdbg.ko
+-rw-r--r-- 1 root root   74296 2009-01-01 02:00 sprd_pmic_adc.ko
+-rw-r--r-- 1 root root   21560 2009-01-01 02:00 sprd_pmic_dump.ko
+-rw-r--r-- 1 root root   22808 2009-01-01 02:00 sprd_pmic_smpl.ko
+-rw-r--r-- 1 root root   35176 2009-01-01 02:00 sprd_pmic_wdt.ko
+-rw-r--r-- 1 root root   73128 2009-01-01 02:00 sprd_power_volt_snr.ko
+-rw-r--r-- 1 root root   53936 2009-01-01 02:00 sprd_pub_vsr.ko
+-rw-r--r-- 1 root root  252832 2009-01-01 02:00 sprd_sensor.ko
+-rw-r--r-- 1 root root   25808 2009-01-01 02:00 sprd_shell_thm.ko
+-rw-r--r-- 1 root root   27000 2009-01-01 02:00 sprd_shm.ko
+-rw-r--r-- 1 root root   19080 2009-01-01 02:00 sprd_suspend_helper.ko
+-rw-r--r-- 1 root root  251888 2009-01-01 02:00 sprd_tcpm.ko
+-rw-r--r-- 1 root root   19776 2009-01-01 02:00 sprd_third_battery_fuel.ko
+-rw-r--r-- 1 root root   21200 2009-01-01 02:00 sprd_touchscreen_ts.ko
+-rw-r--r-- 1 root root   22232 2009-01-01 02:00 sprd_trng.ko
+-rw-r--r-- 1 root root   16144 2009-01-01 02:00 sprd_uid.ko
+-rw-r--r-- 1 root root   27288 2009-01-01 02:00 sprd_ump9360_tsensor.ko
+-rw-r--r-- 1 root root   21608 2009-01-01 02:00 sprd_usbpinmux.ko
+-rw-r--r-- 1 root root   16336 2009-01-01 02:00 sprd_virt_thm.ko
+-rw-r--r-- 1 root root 1370496 2009-01-01 02:00 sprd_wlan_combo.ko
+-rw-r--r-- 1 root root  139712 2009-01-01 02:00 sprdbt_tty.ko
+-rw-r--r-- 1 root root  101688 2009-01-01 02:00 stmvl53l8.ko
+-rw-r--r-- 1 root root   26912 2009-01-01 02:00 sysdumpdb_switch.ko
+-rw-r--r-- 1 root root   37976 2009-01-01 02:00 system_heap.ko
+-rw-r--r-- 1 root root   28128 2009-01-01 02:00 tc_adapter_class.ko
+-rw-r--r-- 1 root root   30264 2009-01-01 02:00 tc_algorithm_class.ko
+-rw-r--r-- 1 root root   44184 2009-01-01 02:00 tc_ambient_temp_det.ko
+-rw-r--r-- 1 root root   76576 2009-01-01 02:00 tc_auto_test.ko
+-rw-r--r-- 1 root root   83192 2009-01-01 02:00 tc_battery.ko
+-rw-r--r-- 1 root root   82856 2009-01-01 02:00 tc_charger_class.ko
+-rw-r--r-- 1 root root  282920 2009-01-01 02:00 tc_charger_framework.ko
+-rw-r--r-- 1 root root   70312 2009-01-01 02:00 tc_chg_type_det.ko
+-rw-r--r-- 1 root root   29464 2009-01-01 02:00 tc_common_class.ko
+-rw-r--r-- 1 root root   77024 2009-01-01 02:00 tc_gauge.ko
+-rw-r--r-- 1 root root   65496 2009-01-01 02:00 tc_hvdcp20_algo.ko
+-rw-r--r-- 1 root root   21528 2009-01-01 02:00 tc_lcd_notify.ko
+-rw-r--r-- 1 root root  106200 2009-01-01 02:00 tc_misc_intf.ko
+-rw-r--r-- 1 root root   42888 2009-01-01 02:00 tc_otg_ctrl.ko
+-rw-r--r-- 1 root root   49432 2009-01-01 02:00 tc_pd_adapter.ko
+-rw-r--r-- 1 root root   70904 2009-01-01 02:00 tc_pd_algo.ko
+-rw-r--r-- 1 root root   21448 2009-01-01 02:00 tc_pmic.ko
+-rw-r--r-- 1 root root   97016 2009-01-01 02:00 tc_sc8950.ko
+-rw-r--r-- 1 root root   24952 2009-01-01 02:00 tc_ta_class.ko
+-rw-r--r-- 1 root root   64960 2009-01-01 02:00 tc_tc30_algo.ko
+-rw-r--r-- 1 root root   61440 2009-01-01 02:00 tc_tcpc.ko
+-rw-r--r-- 1 root root   17064 2009-01-01 02:00 tc_tcpc_notifier.ko
+-rw-r--r-- 1 root root   24576 2009-01-01 02:00 tc_tcpc_vdd.ko
+-rw-r--r-- 1 root root   33760 2009-01-01 02:00 tc_temp_forecast.ko
+-rw-r--r-- 1 root root   75224 2009-01-01 02:00 thd.ko
+-rw-r--r-- 1 root root   16392 2009-01-01 02:00 thermal-generic-adc.ko
+-rw-r--r-- 1 root root   20088 2009-01-01 02:00 tkv.ko
+-rw-r--r-- 1 root root   20240 2009-01-01 02:00 tkv_recovery.ko
+-rw-r--r-- 1 root root  144248 2009-01-01 02:00 tmsnfc.ko
+-rw-r--r-- 1 root root   26432 2009-01-01 02:00 tnek.ko
+-rw-r--r-- 1 root root  299736 2009-01-01 02:00 tran-audio-aw87xxx.ko
+-rw-r--r-- 1 root root   21296 2009-01-01 02:00 tran-audio-hl1280.ko
+-rw-r--r-- 1 root root   55656 2009-01-01 02:00 tran-proc-bootdevice-mod.ko
+-rw-r--r-- 1 root root  156776 2009-01-01 02:00 tran_health_sched.ko
+-rw-r--r-- 1 root root   21992 2009-01-01 02:00 tran_hwinfo.ko
+-rw-r--r-- 1 root root   34456 2009-01-01 02:00 tran_key_bigdata.ko
+-rw-r--r-- 1 root root   25864 2009-01-01 02:00 tran_ldo.ko
+-rw-r--r-- 1 root root   80584 2009-01-01 02:00 tran_mm_collect.ko
+-rw-r--r-- 1 root root   43624 2009-01-01 02:00 tran_rhi.ko
+-rw-r--r-- 1 root root   91368 2009-01-01 02:00 tran_usb_ctrl.ko
+-rw-r--r-- 1 root root   40176 2009-01-01 02:00 tran_util.ko
+-rw-r--r-- 1 root root   36144 2009-01-01 02:00 tranbootprof.ko
+-rw-r--r-- 1 root root   22112 2009-01-01 02:00 trangpio.ko
+-rw-r--r-- 1 root root  316040 2009-01-01 02:00 trans_sched.ko
+-rw-r--r-- 1 root root   90616 2009-01-01 02:00 transsion_trancare.ko
+-rw-r--r-- 1 root root   78648 2009-01-01 02:00 trusty-ipc.ko
+-rw-r--r-- 1 root root   39328 2009-01-01 02:00 trusty-irq.ko
+-rw-r--r-- 1 root root   48200 2009-01-01 02:00 trusty-log.ko
+-rw-r--r-- 1 root root   17080 2009-01-01 02:00 trusty-pm.ko
+-rw-r--r-- 1 root root   21680 2009-01-01 02:00 trusty-tui.ko
+-rw-r--r-- 1 root root   33440 2009-01-01 02:00 trusty-virtio.ko
+-rw-r--r-- 1 root root   55440 2009-01-01 02:00 trusty.ko
+-rw-r--r-- 1 root root  206552 2009-01-01 02:00 ump965x_fuel_gauge.ko
+-rw-r--r-- 1 root root   34104 2009-01-01 02:00 ums9360_serdes.ko
+-rw-r--r-- 1 root root   34032 2009-01-01 02:00 uniber.ko
+-rw-r--r-- 1 root root  152424 2009-01-01 02:00 unisoc-iommu.ko
+-rw-r--r-- 1 root root   73624 2009-01-01 02:00 unisoc_aphang.ko
+-rw-r--r-- 1 root root   41032 2009-01-01 02:00 unisoc_bootinfo.ko
+-rw-r--r-- 1 root root   34880 2009-01-01 02:00 unisoc_freqlink.ko
+-rw-r--r-- 1 root root  175080 2009-01-01 02:00 unisoc_fsio.ko
+-rw-r--r-- 1 root root   52768 2009-01-01 02:00 unisoc_gnss_common_ctl_all.ko
+-rw-r--r-- 1 root root   33312 2009-01-01 02:00 unisoc_gnss_dbg.ko
+-rw-r--r-- 1 root root   16112 2009-01-01 02:00 unisoc_gnss_pmnotify_ctl.ko
+-rw-r--r-- 1 root root   99544 2009-01-01 02:00 unisoc_last_kmsg.ko
+-rw-r--r-- 1 root root   48936 2009-01-01 02:00 unisoc_mm_emem.ko
+-rw-r--r-- 1 root root   68160 2009-01-01 02:00 unisoc_mm_reclaim.ko
+-rw-r--r-- 1 root root   19688 2009-01-01 02:00 unisoc_mm_ummd.ko
+-rw-r--r-- 1 root root   20440 2009-01-01 02:00 unisoc_multi_control.ko
+-rw-r--r-- 1 root root   65640 2009-01-01 02:00 unisoc_scufreq.ko
+-rw-r--r-- 1 root root   21312 2009-01-01 02:00 unisoc_userlog.ko
+-rw-r--r-- 1 root root 1096904 2009-01-01 02:00 unisoc_wcn_bsp.ko
+-rw-r--r-- 1 root root   78672 2009-01-01 02:00 usb-phy-sprd-hs.ko
+-rw-r--r-- 1 root root  142328 2009-01-01 02:00 vpu.ko
+-rw-r--r-- 1 root root  320880 2009-01-01 02:00 zram.ko
+-rw-r--r-- 1 root root   55472 2009-01-01 02:00 zsmalloc.ko

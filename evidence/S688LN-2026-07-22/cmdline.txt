@@ -1,0 +1,7 @@
+console=ttynull stack_depot_disable=on cgroup_disable=pressure kasan.stacktrace=off kvm-arm.mode=protected bootconfig ioremap_guard earlycon=sprd_serial,0x20210000,921600n8 console=ttyS1,921600n8
+       loop.max_part=7 loglevel=1 log_buf_len=1M kpti=0
+       firmware_class.path=/odm/firmware
+       init=/init root=/dev/ram0 rw printk.devkmsg=on pcie_ports=compat
+       swiotlb=1,0 rcupdate.rcu_expedited=1
+       workqueue.cpu_intensive_thresh_us=200000
+       cpufreq.default_governor=uscfreq printk.console_no_auto_verbose=1 nosoftlockup memblock_memsize=procfs sprdlog.idx=0x96 lcd_id=ID616201 lcd_name=lcd_vtdr6126a_fhdp_dsi_vdo_dsc_tm_chct_120hz_s688ln lcd_base=BD000000 lcd_size=1080x2400 logo_bpix=24 tkv=4093640704  sysdump_magic=80001000 sysdump_re_flag=1 modem=shutdown sprdboot.mode=normal ltemode=lcsfb rfboard.id=1 rfhw.id=1024 crystal=6 32k.less=1 marlin.clktype=1 ird=-1 cpcmdline=end  bootconfig bootcause="Reboot into normal" pwroffcause="&device pwr down" charge.shutdown_rtc_time=-1  charge.charge_cycle=32975  charge.basp=-1  charge.total_mah=6003000  nrawsoc=100 charge.vbat=4476 charge.ibat=1 cc_type=0  sprdboot.wdten=e551  sprdboot.dswdten=enabled  sprdboot.dvfs_set=0x0,3E0F83E0,0 sprdboot.slot_suffix=_a sprdboot.flash=ufs tspl=0ms tsml=1079ms tuboot=12952ms 

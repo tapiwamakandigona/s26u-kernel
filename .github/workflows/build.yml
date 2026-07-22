@@ -29,6 +29,17 @@ permissions:
 
 env:
   ACK_BRANCH: common-android15-6.6
+  # v0.2 FIX: pin common/ to the EXACT stock ACK commit so every exported-symbol
+  # MODVERSIONS CRC is byte-identical to the device's stock kernel. v0.1 built ACK
+  # tip (6.6.139): the phone booted + display worked (vermagic flag-tail matched)
+  # but the Unisoc WCN/wlan module chain (sprd_wlan_combo -> cfg80211 -> unisoc_wcn_bsp)
+  # was REJECTED on CRC drift between 6.6.102 and 6.6.139 -> WiFi never came up.
+  # With MODVERSIONS the loader skips UTS_RELEASE (same_magic strips the version
+  # token) and only checks per-symbol CRCs + the vermagic flag-tail, so matching
+  # the exact source SHA makes the stock vendor .ko files load unchanged.
+  # Extracted from on-device UTS_RELEASE: 6.6.102-android15-8-g1481f357a31c-ab14794947-4k
+  STOCK_COMMON_SHA: "1481f357a31c"
+  STOCK_BUILD_NUMBER: "14794947"
 
 jobs:
   build:
@@ -67,7 +78,24 @@ jobs:
           repo init --depth=1 -u https://android.googlesource.com/kernel/manifest -b "$ACK_BRANCH"
           repo sync -c -j"$(nproc)" --no-tags --no-clone-bundle --fail-fast --optimized-fetch
           echo "== tree =="; ls
-          echo "== GKI base version =="; head -3 common/Makefile
+          echo "== GKI base version (ACK tip) =="; head -3 common/Makefile
+
+      - name: Pin common/ to exact stock commit (v0.2 WiFi fix)
+        run: |
+          cd android-kernel/common
+          echo "Fetching stock GKI commit $STOCK_COMMON_SHA ..."
+          # googlesource allows fetch-by-SHA (uploadpack.allowReachableSHA1InWant)
+          git fetch --depth=1 origin "$STOCK_COMMON_SHA"
+          git checkout --detach "$STOCK_COMMON_SHA"
+          echo "== common/ now at =="
+          git --no-pager log -1 --format='%H %s'
+          echo "== Makefile sublevel (must read 6.6.102) =="
+          head -4 Makefile
+          SUB=$(grep -E '^SUBLEVEL' Makefile | awk '{print $3}')
+          if [ "$SUB" != "102" ]; then
+            echo "::error::SUBLEVEL is $SUB, expected 102 - stock SHA drifted, aborting."
+            exit 1
+          fi
 
       - name: Apply tuning profile (${{ inputs.profile }})
         if: ${{ inputs.profile != 'stock' }}
@@ -78,10 +106,18 @@ jobs:
           tail -30 android-kernel/common/arch/arm64/configs/gki_defconfig
 
       - name: Build GKI (Kleaf)
+        env:
+          # Reproduce the stock -ab<number> scmversion tail. Harmless for module
+          # loading (MODVERSIONS skips UTS_RELEASE) but keeps the build cosmetically
+          # identical to the device's stock kernel for verification.
+          BUILD_NUMBER: ${{ env.STOCK_BUILD_NUMBER }}
+          KLEAF_MAKE_JOBS: 0
         run: |
           cd android-kernel
           # aggressive profile perturbs config -> don't let ABI strict mode hard-fail;
           # the fastboot-boot probe is the real gate for module loading.
+          # NOTE: aggressive (ThinLTO + debug strip) CHANGES symbol CRCs vs stock and
+          # will re-break the WCN/wlan modules -> WiFi. Only stock/safe are WiFi-safe.
           EXTRA=""
           if [ "${{ inputs.profile }}" = "aggressive" ]; then
             EXTRA="--kmi_symbol_list_strict_mode=false"
@@ -118,6 +154,24 @@ jobs:
           fi
           echo "== out contents =="; ls -la out
           ( cd out && sha256sum * > SHA256SUMS.txt; cat SHA256SUMS.txt )
+
+      - name: Verify kernel version string vs stock
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          EXPECT="6.6.102-android15-8-g${STOCK_COMMON_SHA}-ab${STOCK_BUILD_NUMBER}-4k"
+          GOT=""
+          # UTS_RELEASE is embedded in Image; grep the printable version banner.
+          if [ -f out/Image ]; then
+            GOT=$(strings -a out/Image | grep -m1 -E '^6\.6\.102-android15' || true)
+          fi
+          echo "expected (stock): $EXPECT"
+          echo "built:            $GOT"
+          case "$GOT" in
+            6.6.102-android15-8-g${STOCK_COMMON_SHA}*)
+              echo "PASS: sublevel+KMI+SHA match stock -> vendor WCN/wlan CRCs will match." ;;
+            *)
+              echo "::warning::built version string differs from stock. With MODVERSIONS the loader still only checks per-symbol CRCs + vermagic flag-tail, but investigate before flashing." ;;
+          esac
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

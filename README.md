@@ -5,9 +5,21 @@ Free-runner CI that builds a custom **GKI kernel** for the **itel S26 Ultra**
 private dev repo, so the build lives here on a public repo where GitHub runners are
 free (same pattern as the PodEQ mirror).
 
-Device stock kernel (VERIFIED from recon): `6.6.102-android15-8` GKI, built with
-clang 18 / kleaf, `LTO_NONE`, MODVERSIONS + ABI symbol list (`abi_symbollist.raw`),
-default TCP `cubic`, zram `lzo-rle`.
+Device stock kernel (VERIFIED from on-device evidence 2026-07-22):
+`6.6.102-android15-8-g1481f357a31c-ab14794947-4k` GKI, clang 18 / kleaf,
+`LTO_NONE`, `MODVERSIONS=y`, default TCP `cubic`, zram `lzo-rle`.
+
+## v0.2 — the WiFi fix (why v0.1 broke it)
+v0.1 built ACK **tip (6.6.139)**. The phone booted and display worked (vermagic
+flag-tail matched), but the Unisoc **WCN/wlan** vendor modules
+(`sprd_wlan_combo` → `cfg80211` → `unisoc_wcn_bsp`) were rejected on **symbol-CRC
+drift** between 6.6.102 and 6.6.139 → WiFi never came up. With `MODVERSIONS`, the
+loader ignores `UTS_RELEASE` and only checks per-symbol CRCs, so the fix is to pin
+`common/` to the **exact stock commit `1481f357a31c`** (build sets
+`STOCK_COMMON_SHA` / `STOCK_BUILD_NUMBER`). Then the stock vendor `.ko`s load
+unchanged. `safe` (config-only bbr/zstd) keeps CRCs identical → WiFi-safe;
+**`aggressive` (ThinLTO) changes CRCs → will re-break WiFi, do not flash.**
+Full analysis: `evidence/S688LN-2026-07-22/FINDINGS.md`.
 
 ## The plan (risk-ordered, one step at a time)
 
