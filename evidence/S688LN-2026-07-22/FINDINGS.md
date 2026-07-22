@@ -33,3 +33,28 @@ Pin `common/` to the **exact stock SHA `1481f357a31c`** so every exported-symbol
 Set `BUILD_NUMBER=14794947` to reproduce the `-ab…` tail (cosmetic; MODVERSIONS ignores it for loading).
 
 Files here: `kernel_evidence.txt` (uname/modules/sys), `ko_list.txt` (vendor module inventory), `stock_config.gz` (`/proc/config.gz`), `cmdline.txt`, `props.txt`. Full `dmesg.txt`/`logcat_tail.txt` kept locally (too large to commit).
+
+---
+
+## Post-mortem addendum (2026-07-22, after v0.2.1 on-device test)
+
+**v0.2.1** (run 29948393054): source pinned to exact stock build — `common/` @
+`1481f357a31cf37eeda2f6a98b9d80c8b78184de`, all 36 manifest projects pinned to
+ab/14794947 revisions, SUBLEVEL=102 asserted, clang 18, stock profile, kernel-only
+header-v4 boot.img. Flash succeeded, device booted, **WiFi and Bluetooth still
+dead** — WiFi toggle flips back off; BT reports on but "more info" shows off.
+Identical symptom to v0.1.
+
+**Conclusion:** exact-source pinning did NOT fix WCN module loading. The remaining
+divergence is in Google's official build environment, not the source: candidates
+are (a) genksyms CRC divergence from config/sandbox differences vs the official
+`kernel_aarch64` build, (b) module signature enforcement against the factory
+kernel's signing key, (c) vendor userspace (wcnd/hal) validating the exact
+`ab14794947` build stamp. None are reproducible from public material.
+
+**Decision: kernel line PARKED.** Two failed on-device attempts; owner is
+risk-averse; flash/undo mechanics proven but no path to working WCN without
+itel's kernel source (not published — GPL violation) or the factory build
+environment. Do not flash any profile, including `safe`. De-skin continues via
+Magisk modules on the stock kernel (Tier 1–2); Tier 3 closed, Tier 4 (GSI)
+remains parked.
