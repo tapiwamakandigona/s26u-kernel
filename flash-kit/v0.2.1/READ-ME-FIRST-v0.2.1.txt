@@ -1,0 +1,50 @@
+KERNEL v0.2.1 - THE WIFI FIX ATTEMPT (READ ME FIRST)
+=====================================================
+
+WHAT THIS IS
+------------
+v0.1 broke WiFi because it was built from a NEWER kernel
+(6.6.139) than your phone's stock one (6.6.102). Your phone's
+WiFi driver checks exact version stamps and refused to load.
+
+v0.2.1 is built from the EXACT same source snapshot Google used
+for your stock kernel: 6.6.102-android15-8, same compiler, same
+settings. The WiFi driver should now accept it.
+
+This kit is the same routine you already did once (and undid
+once) - flash boot only, in fastbootd. Root stays. Undo included.
+
+HOW TO USE
+----------
+1. Unzip this WHOLE zip into your existing kernel-kit folder
+   (the one with the platform-tools folder and backup\ folder
+   from last time). Say YES to overwrite boot.img.
+   - The backup\boot_stock_a.img from STEP 1 must still be
+     there. If it is missing, STOP and tell Viktor.
+2. Phone ON, unlocked, USB cable in, USB debugging ON.
+3. Double-click  STEP-2-FASTBOOTD-FLASH.bat  and follow it.
+4. After reboot, check in this order:
+     - WiFi turns on and connects   <-- the big one
+     - Magisk still shows root
+     - Camera, fingerprint, a short call
+     - Phone not hot
+5. Copy the window text + your checks to Viktor - pass or fail.
+
+IF WIFI IS STILL DEAD (or anything else is wrong):
+   Double-click  UNDO-FASTBOOTD.bat  - same undo you already
+   used successfully. You'll be back on stock in 2 minutes.
+
+IF THE PHONE WON'T BOOT:
+   - Hold POWER ~10s to force off.
+   - Hold VOLUME DOWN + plug in USB -> bootloader fastboot.
+   - Double-click  UNDO-FASTBOOTD.bat
+
+Nothing here touches init_boot, vendor_boot, thermal, or your
+data/banking. Root (Magisk) is preserved.
+
+FILE CHECK (optional)
+---------------------
+boot.img SHA-256:
+1179b7851749c45394654d60cd3d6d9e57b9b5ad26a726bffe15007f38053551
+Kernel inside: 6.6.102-android15-8-maybe-dirty-4k
+("maybe-dirty" is just a build-stamp quirk, not a problem.)
