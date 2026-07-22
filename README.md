@@ -1,5 +1,17 @@
 # S26U GKI kernel CI
 
+> **PROJECT PARKED — 2026-07-22.** v0.2.1 (exact stock source pin
+> `1481f357a31c` / ab14794947, verified checkout, stock profile) flashed OK and
+> booted, but **WiFi and Bluetooth still failed to come up** — identical symptom
+> to v0.1 (toggle flips back off; BT reports on but is off). Conclusion: the
+> Unisoc WCN vendor stack only accepts the *factory-built kernel binary*; even a
+> byte-faithful source rebuild is rejected (suspected: CRC/genksyms or module
+> signing divergence in Google's official build environment that we cannot
+> reproduce). Device restored to stock via UNDO-FASTBOOTD (root intact). No
+> further kernel builds should be flashed. Post-mortem:
+> `evidence/S688LN-2026-07-22/FINDINGS.md`. The de-skin ladder continues via
+> Magisk modules on the stock kernel.
+
 Free-runner CI that builds a custom **GKI kernel** for the **itel S26 Ultra**
 (S688LN · Unisoc T7300 · ums9360 · Android 15). Actions is billing-blocked on the
 private dev repo, so the build lives here on a public repo where GitHub runners are
