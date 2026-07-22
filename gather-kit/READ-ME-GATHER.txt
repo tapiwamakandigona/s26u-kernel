@@ -1,0 +1,21 @@
+S688LN GATHER-INFO KIT  (100% read-only, completely safe)
+==========================================================
+
+WHAT IT DOES
+  Reads info from the phone so Viktor can build kernel v0.2 with
+  working WiFi: exact kernel version, itel's kernel config, the
+  WiFi/WCN driver files, and boot logs.
+  It READS only. It writes NOTHING and changes NOTHING on the phone.
+  EcoCash / banking untouched. No flashing involved.
+
+STEPS
+  1. Unzip BOTH files into your kernel-kit folder
+     (the same folder that contains "platform-tools").
+  2. Phone: screen unlocked, USB debugging ON, plug in the cable.
+  3. Double-click GATHER-INFO.bat
+  4. Watch the phone screen:
+       "Allow USB debugging"  -> tap ALLOW
+       "Superuser request"    -> tap GRANT
+  5. Takes about 1 minute. When it says DONE, send the new file
+       S688LN-evidence.zip
+     to Viktor on Slack. That's it.

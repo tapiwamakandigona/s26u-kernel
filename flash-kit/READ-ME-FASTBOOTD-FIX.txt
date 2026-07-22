@@ -1,0 +1,31 @@
+FASTBOOTD FIX - why STEP-2 failed and what to do
+=================================================
+
+The first STEP-2 tried to flash from the BOOTLOADER fastboot
+(the 60s-timer screen). On your Unisoc chip that mode reports
+"boot partition size: 0" and cannot write boot -> it failed
+safely (nothing was written, your phone stayed stock).
+
+The fix: flash from FASTBOOTD instead - the userspace mode you
+rooted init_boot in. These two new scripts do that.
+
+HOW TO USE
+----------
+1. Put BOTH new .bat files in the SAME folder as boot.img and
+   the platform-tools folder (your existing kernel-kit folder).
+2. Phone ON, unlocked, USB cable in, USB debugging ON.
+3. Double-click  STEP-2-FASTBOOTD-FLASH.bat  and follow it.
+   - It reboots into fastbootd, confirms "is-userspace: yes",
+     then flashes boot and reboots.
+4. If anything looks wrong, close the window and send Viktor
+   the text. Do not reboot on a FAILED flash.
+
+IF THE PHONE WON'T BOOT afterwards (recovery):
+   - Hold POWER ~10s to force off.
+   - Hold VOLUME DOWN + plug in USB  -> bootloader fastboot.
+   - Double-click  UNDO-FASTBOOTD.bat  -> restores stock kernel.
+   (fastbootd lives in init_boot/vendor_boot, which we never
+    touch, so it is always reachable even if boot is bad.)
+
+Nothing here touches init_boot, vendor_boot, thermal, or your
+data/banking. Root (Magisk) is preserved.
