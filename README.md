@@ -33,7 +33,12 @@ unchanged. `safe` (config-only bbr/zstd) keeps CRCs identical → WiFi-safe;
 **`aggressive` (ThinLTO) changes CRCs → will re-break WiFi, do not flash.**
 Full analysis: `evidence/S688LN-2026-07-22/FINDINGS.md`.
 
-## The plan (risk-ordered, one step at a time)
+## The plan (risk-ordered, one step at a time) — ⚠️ HISTORICAL / SUPERSEDED
+
+> This ladder was followed to its end and **failed at flash time on every profile**
+> (see the PARKED banner at the top). It is kept only as a record of what was tried.
+> **Do not resume it.** The safe-profile gains (`bbr`, `zstd` zram, KFENCE off) now
+> ship as the **S26U-KernelBoost** Magisk module on the stock kernel instead.
 
 1. **`stock` build — do this first.** Zero changes. Proves the checkout → Kleaf
    build → `boot.img` pack chain works and gives you a boot image to **`fastboot
