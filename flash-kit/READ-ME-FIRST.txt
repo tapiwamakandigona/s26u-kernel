@@ -1,0 +1,40 @@
+S688LN KERNEL KIT — v0.1-stock (kernel 6.6.139-android15-8)
+============================================================
+
+WHAT THIS IS
+  A custom-built kernel for the itel S688LN (S26 Ultra), built from
+  Google's official Android kernel source. This "stock profile" build
+  changes no settings — it only proves the build boots on your phone.
+  Root (Magisk) is NOT touched and stays installed.
+
+FILES
+  STEP-1-PROBE.bat       Backs up your current kernel, then TEST-boots
+                         the new one from memory. Writes nothing
+                         permanent. A normal reboot undoes everything.
+  STEP-2-FLASH.bat       Permanently installs the new kernel.
+                         ONLY run after STEP 1 passed and Viktor says go.
+  UNDO-RESTORE-STOCK.bat Puts your original kernel back. Safe any time.
+  boot.img               The new kernel image.
+                         sha256 33bc8125eb9eff3bd4bf23d56fa06061
+                                ca5529a8755ff065caac79949b7e2a5f
+  backup\                Your stock kernel backup lands here in STEP 1.
+                         KEEP THIS FOLDER SAFE.
+  platform-tools\        Official Google adb/fastboot for Windows.
+
+ORDER
+  1. Run STEP-1-PROBE.bat  -> send the window text + phone check
+                              results to Viktor.
+  2. Wait for Viktor's go.
+  3. Run STEP-2-FLASH.bat.
+
+SAFETY
+  - STEP 1 cannot brick anything: the kernel only runs from memory.
+    If the phone hangs, hold POWER — it reboots back to stock.
+  - init_boot (root), vendor_boot and thermal settings are never
+    touched by any script in this kit.
+  - Full unbrick net (stock .pac via SPD tool) still exists as the
+    last resort, same as during rooting.
+
+NOTE (repo copy): boot.img and platform-tools are not committed here.
+Get boot.img from the release (v0.1-stock) and platform-tools from
+https://dl.google.com/android/repository/platform-tools-latest-windows.zip
