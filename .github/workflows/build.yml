@@ -38,8 +38,15 @@ env:
   # token) and only checks per-symbol CRCs + the vermagic flag-tail, so matching
   # the exact source SHA makes the stock vendor .ko files load unchanged.
   # Extracted from on-device UTS_RELEASE: 6.6.102-android15-8-g1481f357a31c-ab14794947-4k
-  STOCK_COMMON_SHA: "1481f357a31c"
+  # Full SHA resolved via android.googlesource.com (VERIFIED SUBLEVEL=102):
+  STOCK_COMMON_SHA: "1481f357a31cf37eeda2f6a98b9d80c8b78184de"
   STOCK_BUILD_NUMBER: "14794947"
+  # v0.2.1: instead of repo-syncing branch tip and re-pinning common/ afterwards
+  # (v0.2 failed: repo checkouts have no 'origin' remote), we repo-init against
+  # Google CI's per-build manifest for ab/14794947. That pins EVERY project
+  # (common, toolchain, Kleaf, prebuilts) to the exact revisions Google used to
+  # build the stock kernel -> byte-identical CRC environment.
+  STOCK_MANIFEST_URL: "https://ci.android.com/builds/submitted/14794947/kernel_aarch64/latest/raw/manifest_14794947.xml"
 
 jobs:
   build:
@@ -72,26 +79,36 @@ jobs:
           git config --global user.email "ci@s26u.local"
           git config --global user.name "S26U CI"
 
-      - name: Sync ACK ${{ env.ACK_BRANCH }} (shallow)
+      - name: Sync stock-pinned tree (Google CI manifest ab/${{ env.STOCK_BUILD_NUMBER }})
         run: |
           mkdir -p android-kernel && cd android-kernel
+          # Fetch the exact per-build manifest Google used for the stock kernel build.
+          curl -fsSL -o stock_manifest.xml "$STOCK_MANIFEST_URL"
+          grep -q "$STOCK_COMMON_SHA" stock_manifest.xml || {
+            echo "::error::stock manifest does not pin kernel/common to $STOCK_COMMON_SHA - aborting."
+            exit 1
+          }
+          # repo init against the branch, then override with the pinned manifest.
           repo init --depth=1 -u https://android.googlesource.com/kernel/manifest -b "$ACK_BRANCH"
+          mkdir -p .repo/manifests
+          cp stock_manifest.xml .repo/manifests/stock_manifest.xml
+          repo init -m stock_manifest.xml --no-use-superproject
           repo sync -c -j"$(nproc)" --no-tags --no-clone-bundle --fail-fast --optimized-fetch
           echo "== tree =="; ls
-          echo "== GKI base version (ACK tip) =="; head -3 common/Makefile
-
-      - name: Pin common/ to exact stock commit (v0.2 WiFi fix)
-        run: |
-          cd android-kernel/common
-          echo "Fetching stock GKI commit $STOCK_COMMON_SHA ..."
-          # googlesource allows fetch-by-SHA (uploadpack.allowReachableSHA1InWant)
-          git fetch --depth=1 origin "$STOCK_COMMON_SHA"
-          git checkout --detach "$STOCK_COMMON_SHA"
           echo "== common/ now at =="
-          git --no-pager log -1 --format='%H %s'
+          git -C common --no-pager log -1 --format='%H %s'
+
+      - name: Verify pinned checkout (v0.2 WiFi fix)
+        run: |
+          cd android-kernel
+          HEADSHA=$(git -C common rev-parse HEAD)
+          if [ "$HEADSHA" != "$STOCK_COMMON_SHA" ]; then
+            echo "::error::common/ is at $HEADSHA, expected $STOCK_COMMON_SHA - aborting."
+            exit 1
+          fi
           echo "== Makefile sublevel (must read 6.6.102) =="
-          head -4 Makefile
-          SUB=$(grep -E '^SUBLEVEL' Makefile | awk '{print $3}')
+          head -4 common/Makefile
+          SUB=$(grep -E '^SUBLEVEL' common/Makefile | awk '{print $3}')
           if [ "$SUB" != "102" ]; then
             echo "::error::SUBLEVEL is $SUB, expected 102 - stock SHA drifted, aborting."
             exit 1
@@ -158,7 +175,8 @@ jobs:
       - name: Verify kernel version string vs stock
         run: |
           cd "$GITHUB_WORKSPACE"
-          EXPECT="6.6.102-android15-8-g${STOCK_COMMON_SHA}-ab${STOCK_BUILD_NUMBER}-4k"
+          SHORT_SHA="${STOCK_COMMON_SHA:0:12}"   # setlocalversion embeds 12-char abbrev
+          EXPECT="6.6.102-android15-8-g${SHORT_SHA}-ab${STOCK_BUILD_NUMBER}-4k"
           GOT=""
           # UTS_RELEASE is embedded in Image; grep the printable version banner.
           if [ -f out/Image ]; then
@@ -167,7 +185,7 @@ jobs:
           echo "expected (stock): $EXPECT"
           echo "built:            $GOT"
           case "$GOT" in
-            6.6.102-android15-8-g${STOCK_COMMON_SHA}*)
+            6.6.102-android15-8-g${SHORT_SHA}*)
               echo "PASS: sublevel+KMI+SHA match stock -> vendor WCN/wlan CRCs will match." ;;
             *)
               echo "::warning::built version string differs from stock. With MODVERSIONS the loader still only checks per-symbol CRCs + vermagic flag-tail, but investigate before flashing." ;;
