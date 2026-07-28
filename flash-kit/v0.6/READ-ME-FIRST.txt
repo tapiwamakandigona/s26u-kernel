@@ -1,0 +1,36 @@
+S688LN kernel kit v0.6 - "signed modules" (exact-stamp kernel + WiFi fix)
+==========================================================================
+
+WHY v0.6: the v0.5 flash proved the version-string theory right - the
+phone finally FOUND the missing WiFi/BT modules. But it refused to load
+Google's rfkill module because every kernel build only trusts helper
+modules signed by ITS OWN build key. v0.6 ships the SAME exact-stamp
+kernel PLUS its own build-matched, correctly-signed rfkill module,
+auto-loaded at every boot by a tiny Magisk module.
+
+The Magisk module is safe by design:
+  - On the STOCK kernel it does NOTHING (it sees rfkill already loaded
+    and exits immediately).
+  - It only loads drivers, exactly like the phone does at every boot.
+  - Remove it any time in the Magisk app under Modules.
+
+HOW TO USE - one step at a time, wait for each to finish:
+
+  1. STEP-1-CHECK.bat   - read-only. Makes/checks your stock backup.
+                          (If you still have the v0.5 folder you can
+                          instead copy its backup\ folder into this one.)
+  2. STEP-2-FLASH.bat   - installs the WiFi-fix module into Magisk,
+                          then flashes the v0.6 kernel and reboots.
+  3. After boot: try the WiFi and Bluetooth switches.
+  4. STEP-3-TEST.bat    - packs the result logs for Viktor, PASS or FAIL.
+     Send S688LN-v06-logs.zip to Viktor on Slack.
+
+UNDO - always available:
+  RESTORE-STOCK-v2.bat  - puts your stock kernel back in 2 minutes.
+                          You have already used it successfully.
+  The Magisk module does nothing on stock, but you can also remove it
+  in the Magisk app under Modules.
+
+Your data, apps, Magisk root and banking apps are not touched by any
+of these steps. Only the boot partition (slot a) is written, and your
+verified stock backup restores it exactly.

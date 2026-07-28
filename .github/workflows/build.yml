@@ -172,8 +172,17 @@ jobs:
                 --output out/boot.img && echo "packed boot.img (no-ramdisk, v4)"
             fi
           fi
-          echo "== out contents =="; ls -la out
-          ( cd out && sha256sum * > SHA256SUMS.txt; cat SHA256SUMS.txt )
+          # v0.6: keep this build's OWN SIGNED GKI modules. The v0.5 on-device
+          # logs proved the last wall is module signing: stock rfkill.ko is
+          # signed with Google's per-build key, our kernel only trusts modules
+          # signed with THIS build's key ("rfkill: exports protected symbol
+          # rfkill_alloc" -> EPERM). Same-run dist/*.ko carry the matching key.
+          mkdir -p out/gki
+          for m in rfkill mii usbnet asix ax88179_178a cdc_ether cdc_eem cdc_ncm r8152 r8153_ecm aqc111; do
+            [ -f "dist/$m.ko" ] && cp "dist/$m.ko" out/gki/ && echo "collected gki/$m.ko"
+          done
+          echo "== out contents =="; ls -la out out/gki
+          ( cd out && sha256sum * gki/* 2>/dev/null > SHA256SUMS.txt; cat SHA256SUMS.txt )
 
       - name: Verify kernel version string vs stock
         run: |
@@ -199,14 +208,52 @@ jobs:
             exit 1
           fi
 
+      - name: Verify signed GKI modules (v0.6 hard gate)
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          SHORT_SHA="${STOCK_COMMON_SHA:0:12}"
+          EXPECT="6.6.102-android15-8-g${SHORT_SHA}-ab${STOCK_BUILD_NUMBER}-4k"
+          # rfkill.ko is the keystone: it must exist, carry the exact stock
+          # vermagic, and carry an appended module signature (signed with this
+          # build's key, which the Image trusts).
+          test -f out/gki/rfkill.ko || { echo "::error::rfkill.ko missing from dist - v0.6 kit would be useless."; exit 1; }
+          MODINFO="$(find android-kernel -name modinfo -type f | head -1)"
+          if [ -z "$MODINFO" ]; then MODINFO="modinfo"; fi
+          VM="$("$MODINFO" -F vermagic out/gki/rfkill.ko 2>/dev/null | awk '{print $1}' || true)"
+          if [ -z "$VM" ]; then
+            VM="$(strings -a out/gki/rfkill.ko | grep -m1 -oE '6\.6\.102-android15[^ ]*' || true)"
+          fi
+          echo "rfkill.ko vermagic release: $VM (expect $EXPECT)"
+          [ "$VM" = "$EXPECT" ] || { echo "::error::rfkill.ko vermagic does not match stock release string."; exit 1; }
+          if tail -c 100 out/gki/rfkill.ko | grep -q "Module signature appended"; then
+            echo "PASS: rfkill.ko carries an appended module signature."
+          else
+            echo "::error::rfkill.ko is NOT signed - kernel would reject it (protected exports)."
+            exit 1
+          fi
+
+      - name: Build WiFi-fix Magisk module zip
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          MOD=magisk-mod-build
+          rm -rf "$MOD" && mkdir -p "$MOD/gki"
+          cp flash-kit/v0.6/magisk-module/module.prop "$MOD/"
+          cp flash-kit/v0.6/magisk-module/post-fs-data.sh "$MOD/"
+          cp flash-kit/v0.6/magisk-module/service.sh "$MOD/"
+          cp out/gki/*.ko "$MOD/gki/"
+          # Magisk requires module.prop at zip root.
+          ( cd "$MOD" && zip -qr ../s688ln-wifi-fix-v0.6.zip . )
+          unzip -l s688ln-wifi-fix-v0.6.zip
+          sha256sum s688ln-wifi-fix-v0.6.zip
+
       - name: Assemble double-click flash kit (zip built on CI)
         run: |
           cd "$GITHUB_WORKSPACE"
-          KIT="S688LN-kernel-v0.5-exact-stamp"
+          KIT="S688LN-kernel-v0.6-signed-modules"
           mkdir -p "$KIT/backup" "$KIT/logs" "$KIT/check"
           cp out/boot.img "$KIT/"
-          cp flash-kit/v0.5/*.bat flash-kit/v0.5/*.txt "$KIT/"
-          cp flash-kit/v0.5/rescue.sh "$KIT/"
+          cp flash-kit/v0.6/*.bat flash-kit/v0.6/*.txt "$KIT/"
+          cp s688ln-wifi-fix-v0.6.zip "$KIT/"
           echo "STEP-1 puts your stock kernel backup here." > "$KIT/backup/READ-ME.txt"
           echo "STEP-3 puts logs for Viktor here." > "$KIT/logs/READ-ME.txt"
           echo "STEP-1 puts read-only check results for Viktor here." > "$KIT/check/READ-ME.txt"
@@ -225,7 +272,8 @@ jobs:
           name: s26u-gki-${{ inputs.profile }}
           path: |
             out/
-            S688LN-kernel-v0.5-exact-stamp.zip
+            s688ln-wifi-fix-v0.6.zip
+            S688LN-kernel-v0.6-signed-modules.zip
           if-no-files-found: error
           retention-days: 30
 
@@ -234,9 +282,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd "$GITHUB_WORKSPACE"
-          TAG="v0.5-${{ inputs.profile }}-run${{ github.run_id }}"
+          TAG="v0.6-${{ inputs.profile }}-run${{ github.run_id }}"
           gh release create "$TAG" \
-            --title "S688LN kernel v0.5 exact-stamp (${{ inputs.profile }})" \
-            --notes "Exact-stock-uname rebuild (--config=stamp + BUILD_NUMBER). Kernel release string verified byte-identical to stock: 6.6.102-android15-8-g1481f357a31c-ab14794947-4k. Kit zip includes boot.img, platform-tools, and the parse-safe .bat steps." \
-            "S688LN-kernel-v0.5-exact-stamp.zip" \
+            --title "S688LN kernel v0.6 signed-modules (${{ inputs.profile }})" \
+            --notes "Exact-stamp kernel + this build's OWN SIGNED GKI modules (rfkill & USB-net family) auto-loaded by a Magisk module. Fixes the v0.5 finding: kernel rejected Google-signed rfkill.ko ('exports protected symbol rfkill_alloc' -> EPERM), killing the whole WiFi/BT chain. Kit zip includes boot.img, the Magisk fix zip, platform-tools, and the parse-safe .bat steps." \
+            "S688LN-kernel-v0.6-signed-modules.zip" \
+            "s688ln-wifi-fix-v0.6.zip" \
             "out/SHA256SUMS.txt"
