@@ -54,3 +54,20 @@
 - VERIFIED locally against a reconstructed stock-context fixture: output places
   KPROBES before JUMP_LABEL, EXT4_FS before POSIX_ACL, no CONFIG_KSU line, no
   marker comment, no trailing blank, ends with newline. All 8 assertions ok.
+
+## Iteration 3 — 2026-07-28 23:28 UTC — CI GREEN, v0.7-ksun SHIPPED
+- Run 30405396108 (head 2714dfd): **success** in ~48 min. All 17 steps green, including both ksun hard gates.
+- Evidence (job log):
+  - KSU integration: `common/drivers/Makefile:203:obj-$(CONFIG_KSU) += kernelsu/` after setup.sh v3.3.0.
+  - KSU gate: `PASS: .../out/android15-6.6/common/.config has CONFIG_KSU=y`.
+  - Release gate: `PASS (ksun): release string starts with the stock source prefix (6.6.102-android15-8-g1481f357a31c).`
+    Full string: `6.6.102-android15-8-g1481f357a31c-dirty-ab14794947-4k` — `-dirty` comes from the in-tree KSU
+    symlink/Makefile edits (setup.sh); this is exactly why the ksun gates use prefix match. MODVERSIONS
+    CRCs are what module loading checks, not the release suffix, and rfkill.ko is same-run built+signed.
+  - Module gate: `rfkill.ko vermagic ...-dirty-ab14794947-4k` + `PASS (ksun): rfkill.ko vermagic starts with the stock source prefix.`
+- Release published: `v0.7-ksun-run30405396108` with `S688LN-kernel-v0.7-ksun.zip` (23.1 MB, kit incl. boot.img),
+  `s688ln-wifi-fix-v0.7-ksun.zip` (root-agnostic loader), `SHA256SUMS.txt`.
+- features.json: all CI-verifiable features now `passes:true` with evidence. Remaining: `on-device-verified`
+  (OWNER gate — fastboot boot only, never flash blind).
+- Learning: iteration-1 `check_defconfig` failure taught: gki_defconfig deltas must be minimal (no default-y
+  entries like CONFIG_KSU=y) and menu-ordered; `insert_before()` anchor approach in apply_tuning.sh is the pattern.

@@ -5,44 +5,44 @@
     {
       "id": "ksun-profile",
       "desc": "build.yml exposes a 'ksun' profile choice and routes it through the KSU integration + build path.",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "build.yml pyyaml-parses; 'ksun' in profile choices; routed through KSU setup + tuning + gates; committed ac3d0c6, pushed to main."
     },
     {
       "id": "ksu-source-integrated",
       "desc": "CI clones KSU-Next v3.3.0 and runs setup.sh so common/drivers/{Makefile,Kconfig} + symlink reference kernelsu (no core-source patches).",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "VERIFIED run 30405396108: step 'Integrate KernelSU-Next (ksun profile only)' success; job log shows common/drivers/Makefile:203:obj-$(CONFIG_KSU) += kernelsu/ after setup.sh v3.3.0."
     },
     {
       "id": "ksu-config-on",
       "desc": "apply_tuning.sh ksun sets CONFIG_KSU=y (plus the KMI-safe bbr/zstd tier); build .config contains CONFIG_KSU=y.",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "VERIFIED run 30405396108: hard gate logged 'PASS: .../out/android15-6.6/common/.config has CONFIG_KSU=y' (via KPROBES+EXT4_FS delta, KSU default y)."
     },
     {
       "id": "build-succeeds",
       "desc": "Kleaf dist build completes and emits Image + boot.img for the ksun profile on the free runner.",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "VERIFIED run 30405396108 (head 2714dfd): conclusion=success in ~48m; 'Build GKI (Kleaf)' + 'Collect + pack boot image' succeeded; release v0.7-ksun-run30405396108 published with S688LN-kernel-v0.7-ksun.zip (23.1 MB)."
     },
     {
       "id": "release-prefix-gate",
       "desc": "Built kernel release string starts with 6.6.102-android15-8-g1481f357a31c (correct pinned source + KMI + stamp); full string logged.",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "VERIFIED run 30405396108: 'PASS (ksun): release string starts with the stock source prefix (6.6.102-android15-8-g1481f357a31c).' Full release = 6.6.102-android15-8-g1481f357a31c-dirty-ab14794947-4k (-dirty from KSU tree edits; MODVERSIONS/CRC unaffected)."
     },
     {
       "id": "signed-rfkill-carried",
       "desc": "Same-run signed rfkill.ko present, correct vermagic, 'Module signature appended' (v0.6 gate reused).",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "VERIFIED run 30405396108: 'rfkill.ko vermagic release: 6.6.102-android15-8-g1481f357a31c-dirty-ab14794947-4k' + 'PASS (ksun): rfkill.ko vermagic starts with the stock source prefix.' (same-run signed, v0.6 gate reused with ksun prefix rule)."
     },
     {
       "id": "wifi-fix-module-packaged",
       "desc": "Root-agnostic WiFi/BT fix module zip (works under Magisk or KernelSU) built and attached to the ksun release.",
-      "passes": false,
-      "evidence": ""
+      "passes": true,
+      "evidence": "VERIFIED run 30405396108: s688ln-wifi-fix-v0.7-ksun.zip (208 KB, root-agnostic post-fs-data loader) attached to release v0.7-ksun-run30405396108 alongside kit + SHA256SUMS.txt."
     },
     {
       "id": "on-device-verified",
