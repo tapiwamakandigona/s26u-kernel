@@ -23,3 +23,16 @@
   bundles Windows platform-tools adb.exe) + SHA256SUMS.txt.
 - VERIFIED: downloaded zip sha256 == published SHA256SUMS (7b203b3c9030...).
 - Remaining passes:false features require the physical phone (owner run).
+
+## 2026-07-28 — v1.1: DIAGNOSE.bat (owner-requested flow change)
+- Owner flow: DIAGNOSE first -> owner sends logs -> generate tailored restore .bat.
+- VERIFIED owner's claim: full stock firmware IS in the repos — release
+  `firmware-S688LN-15.1.2.170SP05` on private itel-s26-ultra-Dev (7.35 GB
+  split .7z, exact build OP001PF001AZ, reassembled sha256 cc18ca1d25d5...).
+  PacExtractor + pac_manifest.json + spd_dump also present. So truly-deleted
+  APKs CAN be recovered: extract from firmware -> ship as Magisk-mount module.
+- DIAGNOSE.bat additions vs STEP-1: -f codePath existence check (flags
+  MISSING_FILE for root-deleted APKs still tracked by PMS), on-disk app-dir
+  listing, Magisk module+mask inventory, `debloat status` (their module).
+- Note: packages fully forgotten by PMS are invisible to the device scan;
+  those get caught later by diffing the logs against the firmware app list.

@@ -1,6 +1,6 @@
 {
   "project": "S688LN system-app restore kit",
-  "version": "1.0",
+  "version": "1.1",
   "features": [
     {
       "id": "scan_readonly",
@@ -37,6 +37,12 @@
       "desc": "GitHub Actions bundles platform-tools, zips kit, writes SHA256SUMS, publishes a Release",
       "passes": true,
       "evidence": "VERIFIED: run 30333294466 success; release restore-kit-v1.0 published S688LN-restore-kit-v1.0.zip (8.1MB, incl adb.exe) + SHA256SUMS; local sha256 == published sha256 (7b203b3c...)."
+    },
+    {
+      "id": "diagnose_collector",
+      "desc": "DIAGNOSE.bat collects full read-only inventory (installed/disabled/hidden/APK-file-gone/Magisk masks) into S688LN-diagnostics.zip for offline analysis",
+      "passes": false,
+      "evidence": "Syntax reviewed; on-device run by owner pending. Firmware for deleted-APK recovery VERIFIED present: release firmware-S688LN-15.1.2.170SP05 on itel-s26-ultra-Dev (7.35GB split 7z, sha256 cc18ca1d...)."
     }
   ]
 }
