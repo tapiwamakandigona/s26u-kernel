@@ -124,9 +124,12 @@ jobs:
 
       - name: Build GKI (Kleaf)
         env:
-          # Reproduce the stock -ab<number> scmversion tail. Harmless for module
-          # loading (MODVERSIONS skips UTS_RELEASE) but keeps the build cosmetically
-          # identical to the device's stock kernel for verification.
+          # v0.5: BUILD_NUMBER + --config=stamp reproduce the FULL stock scmversion
+          # (-g<sha12>-ab<number>). v0.2.1/v0.4 built WITHOUT stamping -> kernel
+          # reported "6.6.102-android15-8-maybe-dirty-4k". The 14 missing WiFi/BT
+          # modules are exactly the on-demand set resolved via kernel-release-keyed
+          # lookup, so the maybe-dirty uname makes that lookup miss silently.
+          # Exact stamp is the entire point of v0.5.
           BUILD_NUMBER: ${{ env.STOCK_BUILD_NUMBER }}
           KLEAF_MAKE_JOBS: 0
         run: |
@@ -135,9 +138,9 @@ jobs:
           # the fastboot-boot probe is the real gate for module loading.
           # NOTE: aggressive (ThinLTO + debug strip) CHANGES symbol CRCs vs stock and
           # will re-break the WCN/wlan modules -> WiFi. Only stock/safe are WiFi-safe.
-          EXTRA=""
+          EXTRA="--config=stamp"
           if [ "${{ inputs.profile }}" = "aggressive" ]; then
-            EXTRA="--kmi_symbol_list_strict_mode=false"
+            EXTRA="$EXTRA --kmi_symbol_list_strict_mode=false"
           fi
           # Primary path: Kleaf dist (produces Image, Image.lz4, boot.img, System.map).
           if tools/bazel run $EXTRA //common:kernel_aarch64_dist -- \
@@ -184,17 +187,54 @@ jobs:
           fi
           echo "expected (stock): $EXPECT"
           echo "built:            $GOT"
-          case "$GOT" in
-            6.6.102-android15-8-g${SHORT_SHA}*)
-              echo "PASS: sublevel+KMI+SHA match stock -> vendor WCN/wlan CRCs will match." ;;
-            *)
-              echo "::warning::built version string differs from stock. With MODVERSIONS the loader still only checks per-symbol CRCs + vermagic flag-tail, but investigate before flashing." ;;
-          esac
+          # v0.5 HARD GATE: the release string must be byte-identical to stock.
+          # v0.2.1 shipped with a "maybe-dirty" uname because this was only a
+          # warning. The exact uname IS the experiment now - fail loudly instead.
+          if [ "$GOT" = "$EXPECT" ]; then
+            echo "PASS: kernel release string is byte-identical to stock."
+          else
+            echo "::error::kernel release string does not match stock exactly - the v0.5 hypothesis test would be invalid. Aborting."
+            exit 1
+          fi
+
+      - name: Assemble double-click flash kit (zip built on CI)
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          KIT="S688LN-kernel-v0.5-exact-stamp"
+          mkdir -p "$KIT/backup" "$KIT/logs" "$KIT/check"
+          cp out/boot.img "$KIT/"
+          cp flash-kit/v0.5/*.bat flash-kit/v0.5/*.txt "$KIT/"
+          cp flash-kit/v0.5/rescue.sh "$KIT/"
+          echo "STEP-1 puts your stock kernel backup here." > "$KIT/backup/READ-ME.txt"
+          echo "STEP-3 puts logs for Viktor here." > "$KIT/logs/READ-ME.txt"
+          echo "STEP-1 puts read-only check results for Viktor here." > "$KIT/check/READ-ME.txt"
+          # Bundle adb/fastboot so the kit is fully double-click ready.
+          curl -fsSL -o pt.zip https://dl.google.com/android/repository/platform-tools-latest-windows.zip
+          unzip -q pt.zip -d "$KIT"
+          # Record the boot.img hash where STEP-2 can verify it.
+          ( cd "$KIT" && sha256sum boot.img | awk '{print $1}' > EXPECTED-SHA256.txt )
+          zip -qr "$KIT.zip" "$KIT"
+          ls -la "$KIT.zip"
+          sha256sum "$KIT.zip" out/boot.img
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: s26u-gki-${{ inputs.profile }}
-          path: out/
+          path: |
+            out/
+            S688LN-kernel-v0.5-exact-stamp.zip
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish kit as GitHub release (easy download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          TAG="v0.5-${{ inputs.profile }}-run${{ github.run_id }}"
+          gh release create "$TAG" \
+            --title "S688LN kernel v0.5 exact-stamp (${{ inputs.profile }})" \
+            --notes "Exact-stock-uname rebuild (--config=stamp + BUILD_NUMBER). Kernel release string verified byte-identical to stock: 6.6.102-android15-8-g1481f357a31c-ab14794947-4k. Kit zip includes boot.img, platform-tools, and the parse-safe .bat steps." \
+            "S688LN-kernel-v0.5-exact-stamp.zip" \
+            "out/SHA256SUMS.txt"

@@ -1,0 +1,48 @@
+KERNEL v0.5 "EXACT STAMP" - READ ME FIRST
+==========================================
+
+WHAT THIS IS
+------------
+Both kernels we tried before carried the WRONG internal version
+stamp: "maybe-dirty" instead of your stock kernel's exact stamp.
+Your phone stores 14 WiFi/Bluetooth driver files in a folder
+NAMED AFTER that exact version stamp - so the old builds could
+never find them. Everything else loaded fine, which is why the
+phone booted perfectly but WiFi and Bluetooth stayed dead.
+
+v0.5 is the same trusted stock-source build as before, with ONE
+change: the version stamp is now byte-identical to stock
+(the build robot refuses to ship it otherwise).
+
+Nothing here touches init_boot, vendor_boot, thermal, or your
+data/banking. Root (Magisk) is preserved. Your verified restore
+(RESTORE-STOCK-v2.bat) is included and unchanged.
+
+HOW TO USE - one step at a time, reboot between steps
+-----------------------------------------------------
+0. Unzip this WHOLE zip anywhere. Everything is inside,
+   including adb/fastboot. If you still have the old kit's
+   backup folder you can copy backup\boot_stock_a.img over,
+   but STEP 1 can also make a fresh backup by itself.
+
+1. Double-click  STEP-1-CHECK.bat   (read-only, safe)
+   Send  S688LN-check-v05.zip  to Viktor and WAIT for the GO.
+
+2. After Viktor's GO: double-click  STEP-2-FLASH.bat
+   Same routine you have done twice already.
+
+3. After the reboot: double-click  STEP-3-TEST.bat
+   It checks WiFi/BT, tries an automatic rescue if needed, and
+   packs  S688LN-v05-logs.zip  for Viktor. Send it PASS or FAIL.
+
+IF ANYTHING IS WRONG AT ANY POINT
+---------------------------------
+Double-click  RESTORE-STOCK-v2.bat  - the exact restore you
+already used successfully today. Stock back in 2 minutes.
+
+IF THE PHONE WILL NOT BOOT
+--------------------------
+1. Hold POWER about 15 seconds to force it off.
+2. Hold POWER + VOLUME UP until the Recovery menu shows.
+3. Volume keys to "Enter fastboot", press Power.
+4. Plug in USB, double-click  RESTORE-STOCK-v2.bat

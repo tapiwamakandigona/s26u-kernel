@@ -1,6 +1,21 @@
 # S26U GKI kernel CI
 
-> **PROJECT PARKED — 2026-07-22.** v0.2.1 (exact stock source pin
+> **v0.5 "EXACT STAMP" — 2026-07-28, owner-approved un-park (one attempt).**
+> New evidence: BOTH flashed kernels (v0.2.1 CI + v0.4 local) reported
+> `6.6.102-android15-8-maybe-dirty-4k` because Kleaf ran **without
+> `--config=stamp`** — the stock `-g1481f357a31c-ab14794947` scmversion was
+> never actually reproduced on-device. The 14 dead WiFi/BT modules are exactly
+> the on-demand set resolved via kernel-release-keyed lookup (GKI
+> `system_dlkm` ships modules in a directory named after `uname -r`), which a
+> `maybe-dirty` uname misses silently — consistent with zero load *attempts*
+> in dmesg. v0.5 = same pinned stock-source build + `--config=stamp` +
+> `BUILD_NUMBER`, with a **hard CI gate** that fails the build unless the
+> release string is byte-identical to stock. Kit (incl. platform-tools +
+> parse-safe .bat steps + rescue.sh manual-insmod fallback) is zipped **on CI**
+> and published as a release. STEP-1 is a read-only on-device check that must
+> confirm the release-keyed directory before any flash.
+
+> **Previous status (2026-07-22): PROJECT PARKED.** v0.2.1 (exact stock source pin
 > `1481f357a31c` / ab14794947, verified checkout, stock profile) flashed OK and
 > booted, but **WiFi and Bluetooth still failed to come up** — identical symptom
 > to v0.1 (toggle flips back off; BT reports on but is off). Conclusion: the
