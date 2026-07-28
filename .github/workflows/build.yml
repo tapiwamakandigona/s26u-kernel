@@ -183,7 +183,9 @@ jobs:
           GOT=""
           # UTS_RELEASE is embedded in Image; grep the printable version banner.
           if [ -f out/Image ]; then
-            GOT=$(strings -a out/Image | grep -m1 -E '^6\.6\.102-android15' || true)
+            # The banner line in the Image is "<release> SMP preempt mod_unload ..." -
+            # compare only the first token (the actual UTS_RELEASE / uname -r value).
+            GOT=$(strings -a out/Image | grep -m1 -E '^6\.6\.102-android15' | awk '{print $1}' || true)
           fi
           echo "expected (stock): $EXPECT"
           echo "built:            $GOT"
