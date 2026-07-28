@@ -182,7 +182,9 @@ jobs:
             [ -f "dist/$m.ko" ] && cp "dist/$m.ko" out/gki/ && echo "collected gki/$m.ko"
           done
           echo "== out contents =="; ls -la out out/gki
-          ( cd out && sha256sum * gki/* 2>/dev/null > SHA256SUMS.txt; cat SHA256SUMS.txt )
+          # NOTE: use find -type f, NOT globs - `*` matches the gki/ directory,
+          # sha256sum errors on directories and `bash -e` then kills the step.
+          ( cd out && find . -maxdepth 2 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt && cat SHA256SUMS.txt )
 
       - name: Verify kernel version string vs stock
         run: |
