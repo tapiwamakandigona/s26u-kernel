@@ -19,3 +19,38 @@
 2. build.yml: add `ksun` choice + KSU-Next setup step + relaxed release-prefix gate for ksun + CONFIG_KSU verification gate + v0.7 module/kit naming.
 3. Add flash-kit/ksun/ (KSU-aware README + root-agnostic wifi-fix module.prop).
 4. Commit, push, trigger ksun CI run, monitor, record evidence.
+
+## 2026-07-28 22:28 — implemented + pushed + CI triggered (Viktor)
+- VERIFIED (file reads / YAML parse / git):
+  - apply_tuning.sh `ksun` branch: bash -n OK; sets CONFIG_KSU=y + KMI-safe tier.
+  - build.yml: pyyaml parse OK, 17 steps in correct order (KSU setup before tuning;
+    CONFIG_KSU gate after boot pack; release + rfkill gates relaxed to prefix for ksun).
+  - flash-kit/ksun: root-agnostic module.prop (id kept = s688ln_wifi_fix) + loader scripts + README + bat steps.
+  - Commit ac3d0c6 pushed to origin/main (964dd75..ac3d0c6). Remote left tokenless.
+- CI: workflow_dispatch build.yml profile=ksun -> run 30404659854 IN PROGRESS
+  (https://github.com/tapiwamakandigona/s26u-kernel/actions/runs/30404659854).
+- Note/assumption to watch: Kleaf may regen defconfig from fragments and drop raw
+  gki_defconfig edits, but KSU Kconfig is `default y` with deps satisfied, so
+  CONFIG_KSU should still be =y even then. Possible check_defconfig friction if
+  Kleaf flags KSU symbols absent from gki_defconfig — will read the log and iterate.
+- Pending CI verdict: build-succeeds, release-prefix-gate, signed-rfkill-carried,
+  ksu-config-on, wifi-fix-module-packaged. On-device gate remains with owner.
+
+## 2026-07-28 22:32 — CI run 30404659854 FAILED at Kleaf config (iteration 1)
+- VERIFIED from job log: steps 1-9 passed (KSU-Next v3.3.0 integrated:
+  common/drivers/Makefile:203 obj-$(CONFIG_KSU)+=kernelsu/ ; symlink present).
+- Step 10 Build GKI (Kleaf) failed in ~48s at //common:kernel_aarch64_config:
+  "ERROR: savedefconfig does not match common/arch/arm64/configs/gki_defconfig".
+  savedefconfig canonical form wanted: +CONFIG_KPROBES=y (before JUMP_LABEL),
+  +CONFIG_EXT4_FS=y (before EXT4_FS_POSIX_ACL). It OMITTED CONFIG_KSU=y
+  (default y), CONFIG_KRETPROBES=y, DEFAULT_TCP_CONG="bbr", ZRAM_DEF_COMP="zstd"
+  (all equal to their defaults once the bools are set). My appended,
+  out-of-order block tripped the order- and default-sensitive check.
+- FIX (iteration 2): rewrote apply_tuning.sh ksun branch to emit a MINIMAL,
+  CANONICAL delta: insert only KPROBES + EXT4_FS at their menu anchors; do NOT
+  write CONFIG_KSU (relies on default y); drop bbr/zstd for ksun (already done
+  at runtime by S26U-KernelBoost Magisk module). Non-ksun (safe/aggressive)
+  keep bbr/zstd in the else branch, unchanged.
+- VERIFIED locally against a reconstructed stock-context fixture: output places
+  KPROBES before JUMP_LABEL, EXT4_FS before POSIX_ACL, no CONFIG_KSU line, no
+  marker comment, no trailing blank, ends with newline. All 8 assertions ok.
