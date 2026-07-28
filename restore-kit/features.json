@@ -1,6 +1,6 @@
 {
   "project": "S688LN system-app restore kit",
-  "version": "1.2",
+  "version": "1.3",
   "features": [
     {
       "id": "scan_readonly",
@@ -52,9 +52,9 @@
     },
     {
       "id": "tailored_restore_custom",
-      "desc": "RESTORE-CUSTOM.bat restores the exact 23 hidden + 4 disabled packages found on the owner's phone and verifies on-device",
+      "desc": "RESTORE-CUSTOM.bat v1.3 restores the exact 23 hidden packages and leaves the 4 factory-disabled packages in stock (disabled) state, reverting v1.2's mistaken iotcard enable",
       "passes": false,
-      "evidence": "ASSUMED-correct: package lists taken verbatim from owner's 14_hidden.txt/05_disabled.txt; logic mirrors STEP-2 (device-side loops). Awaiting owner run + re-DIAGNOSE showing 0 hidden / 0 disabled."
+      "evidence": "VERIFIED root cause of v1.2 [2/3] failures: all 4 'disabled' packages appear verbatim in the July-21 factory baseline (recon packages_disabled.txt) \u2014 they were never user-disabled. devicelockcontroller/securitycom/gms.supervision are OS-protected (shell pm enable rejected = correct). v1.3 resets iotcard to factory state with default-state + disable-user fallback. Owner run pending."
     }
   ]
 }

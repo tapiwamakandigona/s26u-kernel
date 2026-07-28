@@ -63,3 +63,28 @@
   with on-device verification (pm path per package + disabled count) and
   prints per-app undo commands. Device-side loops as usual (CRLF-safe).
 - On-device execution by owner pending -> passes:false until confirmed.
+
+## 2026-07-28 — v1.3: fix [2/3] — the 4 "disabled" apps are FACTORY-disabled
+- Owner ran RESTORE-CUSTOM v1.2: step [1/3] hidden-app restore OK; step [2/3]
+  3 of 4 `pm enable` FAILED (devicelockcontroller, scorpio.securitycom,
+  gms.supervision), iotcard enabled.
+- ROOT CAUSE (VERIFIED): July-21 recon baseline packages_disabled.txt lists
+  the SAME 4 packages — factory-disabled, never user-disabled. Including them
+  in the enable list was a v1.2 analysis error (05_disabled.txt was taken as
+  user damage without diffing against the baseline disabled list).
+- The 3 failures are the OS protecting dormant security modules
+  (financed-device lock, Transsion payment lock, Kids supervision) from
+  shell — failing was the correct outcome. Do NOT su-force them.
+- iotcard did get enabled (not protected) -> v1.3 reverts it to factory
+  state: `pm default-state`, verify still listed disabled, else
+  `pm disable-user` fallback (exact factory state constant unknowable
+  from recon, but end state matches baseline either way).
+- Expected stock signature after v1.3: 0 hidden / 4 disabled.
+- LESSON: always diff "disabled" against the factory baseline before
+  calling it damage; `pm enable` failures on protected pkgs are a signal,
+  not an error to force through.
+- AI apps status: hidden-23 included kolun.aiservice, kolun.assistant,
+  aiwallpaper (restored in step 1); aicore.matting/ocr, microintelligence,
+  aiwriting.overlay, tranvoicecommand, aivoiceassistant overlay,
+  imaging.aiengine, aigallery.clipper were never removed (enabled at
+  baseline AND in current diagnostics). No AI package missing.
