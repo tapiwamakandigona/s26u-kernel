@@ -16,3 +16,10 @@
 - VERIFIED locally: batch/sh/yml syntax + logic review. NOT yet verified on
   the physical phone (no device in the sandbox) — features that require the
   handset are marked passes:false pending an owner run.
+
+## 2026-07-28 — CI verified, released
+- Pushed to main; dispatched restore-kit.yml (run 30333294466) -> success.
+- Release `restore-kit-v1.0` published: S688LN-restore-kit-v1.0.zip (8.1 MB,
+  bundles Windows platform-tools adb.exe) + SHA256SUMS.txt.
+- VERIFIED: downloaded zip sha256 == published SHA256SUMS (7b203b3c9030...).
+- Remaining passes:false features require the physical phone (owner run).
