@@ -1,0 +1,54 @@
+{
+  "subproject": "ksun",
+  "description": "KernelSU-Next v3.3.0 integrated into the S688LN exact-stamp GKI kernel (kprobe hooks, additive).",
+  "features": [
+    {
+      "id": "ksun-profile",
+      "desc": "build.yml exposes a 'ksun' profile choice and routes it through the KSU integration + build path.",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "ksu-source-integrated",
+      "desc": "CI clones KSU-Next v3.3.0 and runs setup.sh so common/drivers/{Makefile,Kconfig} + symlink reference kernelsu (no core-source patches).",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "ksu-config-on",
+      "desc": "apply_tuning.sh ksun sets CONFIG_KSU=y (plus the KMI-safe bbr/zstd tier); build .config contains CONFIG_KSU=y.",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "build-succeeds",
+      "desc": "Kleaf dist build completes and emits Image + boot.img for the ksun profile on the free runner.",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "release-prefix-gate",
+      "desc": "Built kernel release string starts with 6.6.102-android15-8-g1481f357a31c (correct pinned source + KMI + stamp); full string logged.",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "signed-rfkill-carried",
+      "desc": "Same-run signed rfkill.ko present, correct vermagic, 'Module signature appended' (v0.6 gate reused).",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "wifi-fix-module-packaged",
+      "desc": "Root-agnostic WiFi/BT fix module zip (works under Magisk or KernelSU) built and attached to the ksun release.",
+      "passes": false,
+      "evidence": ""
+    },
+    {
+      "id": "on-device-verified",
+      "desc": "OWNER-only gate: fastboot boot the ksun boot.img -> KSU root works + WiFi + BT + 248 modules. Not flashed blind.",
+      "passes": false,
+      "evidence": "pending owner test"
+    }
+  ]
+}

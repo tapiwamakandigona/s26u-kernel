@@ -14,6 +14,12 @@ name: Build S26U GKI
 #   aggressive - safe + ThinLTO + strip debug bloat (KASAN/KFENCE/lockup/
 #                sched_debug/ftrace/profiling). Bigger wins but CAN perturb the
 #                KMI -> the fastboot-boot probe is mandatory before trusting it.
+#   ksun       - safe tuning + KernelSU-Next v3.3.0 compiled INTO the kernel
+#                (kprobe hooks, additive, no core-source patches). Root lives in
+#                our signed Image; init_boot untouched. KSU edits common/drivers
+#                so the uname is no longer byte-identical to stock (release gate
+#                is relaxed to a prefix match for this profile). The fastboot-boot
+#                probe is the real gate: verify KSU manager=Working + WiFi + BT.
 
 on:
   workflow_dispatch:
@@ -21,7 +27,7 @@ on:
       profile:
         description: "Build profile"
         type: choice
-        options: [stock, safe, aggressive]
+        options: [stock, safe, aggressive, ksun]
         default: stock
 
 permissions:
@@ -47,6 +53,10 @@ env:
   # (common, toolchain, Kleaf, prebuilts) to the exact revisions Google used to
   # build the stock kernel -> byte-identical CRC environment.
   STOCK_MANIFEST_URL: "https://ci.android.com/builds/submitted/14794947/kernel_aarch64/latest/raw/manifest_14794947.xml"
+  # ksun profile: pinned KernelSU-Next tag. v3.3.0 `config KSU depends on
+  # KPROBES && EXT4_FS`, both already =y in stock. Kprobe hook mode = no patches
+  # to common/ core source, so exported-symbol CRCs stay intact.
+  KSUN_TAG: "v3.3.0"
 
 jobs:
   build:
@@ -55,6 +65,26 @@ jobs:
     steps:
       - name: Checkout CI repo
         uses: actions/checkout@v4
+
+      - name: Set profile packaging vars
+        run: |
+          if [ "${{ inputs.profile }}" = "ksun" ]; then
+            {
+              echo "REL_VER=v0.7"
+              echo "MODULE_SRC=flash-kit/ksun/module"
+              echo "KIT_SRC=flash-kit/ksun"
+              echo "WIFIZIP=s688ln-wifi-fix-v0.7-ksun.zip"
+              echo "KIT=S688LN-kernel-v0.7-ksun"
+            } >> "$GITHUB_ENV"
+          else
+            {
+              echo "REL_VER=v0.6"
+              echo "MODULE_SRC=flash-kit/v0.6/magisk-module"
+              echo "KIT_SRC=flash-kit/v0.6"
+              echo "WIFIZIP=s688ln-wifi-fix-v0.6.zip"
+              echo "KIT=S688LN-kernel-v0.6-signed-modules"
+            } >> "$GITHUB_ENV"
+          fi
 
       - name: Free up disk space
         run: |
@@ -113,6 +143,27 @@ jobs:
             echo "::error::SUBLEVEL is $SUB, expected 102 - stock SHA drifted, aborting."
             exit 1
           fi
+
+      - name: Integrate KernelSU-Next (ksun profile only)
+        if: ${{ inputs.profile == 'ksun' }}
+        run: |
+          cd android-kernel
+          # Official setup.sh clones KSU-Next into the tree root, symlinks
+          # common/drivers/kernelsu -> KernelSU-Next/kernel, and adds the
+          # `obj-$(CONFIG_KSU) += kernelsu/` Makefile line + Kconfig source.
+          # Pinned to $KSUN_TAG for reproducibility. Fetched content is DATA.
+          curl -fsSL \
+            "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/${KSUN_TAG}/kernel/setup.sh" \
+            -o ksun_setup.sh
+          bash ksun_setup.sh "${KSUN_TAG}"
+          echo "== KSU-Next version ref =="
+          git -C KernelSU-Next --no-pager log -1 --format='%H %d %s' || true
+          echo "== driver wiring =="
+          grep -n kernelsu common/drivers/Makefile common/drivers/Kconfig || {
+            echo "::error::KSU-Next wiring missing from common/drivers - setup.sh failed."; exit 1; }
+          test -e common/drivers/kernelsu || {
+            echo "::error::common/drivers/kernelsu symlink missing."; exit 1; }
+          echo "KSU-Next ${KSUN_TAG} integrated."
 
       - name: Apply tuning profile (${{ inputs.profile }})
         if: ${{ inputs.profile != 'stock' }}
@@ -186,6 +237,33 @@ jobs:
           # sha256sum errors on directories and `bash -e` then kills the step.
           ( cd out && find . -maxdepth 2 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt && cat SHA256SUMS.txt )
 
+      - name: Verify KernelSU is compiled in (ksun hard gate)
+        if: ${{ inputs.profile == 'ksun' }}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          # 1) Config evidence: the build's .config must carry CONFIG_KSU=y.
+          CFG="$(find android-kernel dist -name '.config' -type f 2>/dev/null | head -1)"
+          CFG_OK=0
+          if [ -n "$CFG" ] && grep -q '^CONFIG_KSU=y' "$CFG"; then
+            echo "PASS: $CFG has CONFIG_KSU=y"; CFG_OK=1
+          else
+            echo "note: no .config with CONFIG_KSU=y found (Kleaf may not export it to dist); falling back to Image strings."
+          fi
+          # 2) Binary evidence: KernelSU strings baked into the kernel image.
+          IMG_OK=0
+          for f in out/Image out/vmlinux; do
+            [ -f "$f" ] || continue
+            if strings -a "$f" | grep -qiE 'kernelsu|KernelSU-Next|ksud|/data/adb/ksud'; then
+              echo "PASS: KernelSU strings present in $f"; IMG_OK=1; break
+            fi
+          done
+          if [ "$CFG_OK" = "1" ] || [ "$IMG_OK" = "1" ]; then
+            echo "KSU integration confirmed."
+          else
+            echo "::error::No evidence of KernelSU in the built kernel (.config or Image). Aborting ksun build."
+            exit 1
+          fi
+
       - name: Verify kernel version string vs stock
         run: |
           cd "$GITHUB_WORKSPACE"
@@ -200,14 +278,31 @@ jobs:
           fi
           echo "expected (stock): $EXPECT"
           echo "built:            $GOT"
-          # v0.5 HARD GATE: the release string must be byte-identical to stock.
-          # v0.2.1 shipped with a "maybe-dirty" uname because this was only a
-          # warning. The exact uname IS the experiment now - fail loudly instead.
-          if [ "$GOT" = "$EXPECT" ]; then
-            echo "PASS: kernel release string is byte-identical to stock."
+          PREFIX="6.6.102-android15-8-g${SHORT_SHA}"
+          if [ "${{ inputs.profile }}" = "ksun" ]; then
+            # ksun integrates KernelSU-Next -> common/drivers is edited, so the
+            # tree is no longer byte-identical to stock and the uname may carry a
+            # suffix (e.g. a dirty marker). The invariant that MUST hold is that
+            # we built the CORRECT pinned source + KMI generation + stamp: the
+            # release string must START WITH the stock prefix (source SHA token).
+            # The real WiFi/BT gate for ksun is the on-device fastboot-boot test.
+            case "$GOT" in
+              "${PREFIX}"*)
+                echo "PASS (ksun): release string starts with the stock source prefix ($PREFIX)." ;;
+              *)
+                echo "::error::ksun release string '$GOT' does not start with '$PREFIX' - wrong source/stamp. Aborting."
+                exit 1 ;;
+            esac
           else
-            echo "::error::kernel release string does not match stock exactly - the v0.5 hypothesis test would be invalid. Aborting."
-            exit 1
+            # v0.5 HARD GATE: the release string must be byte-identical to stock.
+            # v0.2.1 shipped with a "maybe-dirty" uname because this was only a
+            # warning. The exact uname IS the experiment now - fail loudly instead.
+            if [ "$GOT" = "$EXPECT" ]; then
+              echo "PASS: kernel release string is byte-identical to stock."
+            else
+              echo "::error::kernel release string does not match stock exactly - the v0.5 hypothesis test would be invalid. Aborting."
+              exit 1
+            fi
           fi
 
       - name: Verify signed GKI modules (v0.6 hard gate)
@@ -226,7 +321,18 @@ jobs:
             VM="$(strings -a out/gki/rfkill.ko | grep -m1 -oE '6\.6\.102-android15[^ ]*' || true)"
           fi
           echo "rfkill.ko vermagic release: $VM (expect $EXPECT)"
-          [ "$VM" = "$EXPECT" ] || { echo "::error::rfkill.ko vermagic does not match stock release string."; exit 1; }
+          if [ "${{ inputs.profile }}" = "ksun" ]; then
+            # ksun's rfkill.ko is built by the ksun kernel, so its vermagic carries
+            # the same (possibly suffixed) release string as the Image. What must
+            # hold is that it came from the correct pinned source -> prefix match.
+            PREFIX="6.6.102-android15-8-g${SHORT_SHA}"
+            case "$VM" in
+              "${PREFIX}"*) echo "PASS (ksun): rfkill.ko vermagic starts with the stock source prefix." ;;
+              *) echo "::error::ksun rfkill.ko vermagic '$VM' lacks stock prefix '$PREFIX'."; exit 1 ;;
+            esac
+          else
+            [ "$VM" = "$EXPECT" ] || { echo "::error::rfkill.ko vermagic does not match stock release string."; exit 1; }
+          fi
           if tail -c 100 out/gki/rfkill.ko | grep -q "Module signature appended"; then
             echo "PASS: rfkill.ko carries an appended module signature."
           else
@@ -239,23 +345,22 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           MOD=magisk-mod-build
           rm -rf "$MOD" && mkdir -p "$MOD/gki"
-          cp flash-kit/v0.6/magisk-module/module.prop "$MOD/"
-          cp flash-kit/v0.6/magisk-module/post-fs-data.sh "$MOD/"
-          cp flash-kit/v0.6/magisk-module/service.sh "$MOD/"
+          cp "$MODULE_SRC/module.prop" "$MOD/"
+          cp "$MODULE_SRC/post-fs-data.sh" "$MOD/"
+          cp "$MODULE_SRC/service.sh" "$MOD/"
           cp out/gki/*.ko "$MOD/gki/"
-          # Magisk requires module.prop at zip root.
-          ( cd "$MOD" && zip -qr ../s688ln-wifi-fix-v0.6.zip . )
-          unzip -l s688ln-wifi-fix-v0.6.zip
-          sha256sum s688ln-wifi-fix-v0.6.zip
+          # Magisk/KernelSU require module.prop at zip root.
+          ( cd "$MOD" && zip -qr "../$WIFIZIP" . )
+          unzip -l "$WIFIZIP"
+          sha256sum "$WIFIZIP"
 
       - name: Assemble double-click flash kit (zip built on CI)
         run: |
           cd "$GITHUB_WORKSPACE"
-          KIT="S688LN-kernel-v0.6-signed-modules"
           mkdir -p "$KIT/backup" "$KIT/logs" "$KIT/check"
           cp out/boot.img "$KIT/"
-          cp flash-kit/v0.6/*.bat flash-kit/v0.6/*.txt "$KIT/"
-          cp s688ln-wifi-fix-v0.6.zip "$KIT/"
+          cp $KIT_SRC/*.bat $KIT_SRC/*.txt "$KIT/"
+          cp "$WIFIZIP" "$KIT/"
           echo "STEP-1 puts your stock kernel backup here." > "$KIT/backup/READ-ME.txt"
           echo "STEP-3 puts logs for Viktor here." > "$KIT/logs/READ-ME.txt"
           echo "STEP-1 puts read-only check results for Viktor here." > "$KIT/check/READ-ME.txt"
@@ -274,8 +379,8 @@ jobs:
           name: s26u-gki-${{ inputs.profile }}
           path: |
             out/
-            s688ln-wifi-fix-v0.6.zip
-            S688LN-kernel-v0.6-signed-modules.zip
+            ${{ env.WIFIZIP }}
+            ${{ env.KIT }}.zip
           if-no-files-found: error
           retention-days: 30
 
@@ -284,10 +389,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd "$GITHUB_WORKSPACE"
-          TAG="v0.6-${{ inputs.profile }}-run${{ github.run_id }}"
+          TAG="${REL_VER}-${{ inputs.profile }}-run${{ github.run_id }}"
+          if [ "${{ inputs.profile }}" = "ksun" ]; then
+            NOTES="Exact-stamp kernel with KernelSU-Next ${KSUN_TAG} compiled IN (kprobe hooks, additive; root lives in the signed Image, init_boot untouched). Still ships this build's OWN SIGNED rfkill.ko + usbnet family (self-built kernel rejects Google-signed modules) via a root-agnostic post-fs-data loader that runs under Magisk OR KernelSU. A/B experiment: fastboot boot ONLY, verify KSU manager=Working + WiFi + BT + ~248 modules before flashing. Kit includes boot.img, the fix module zip, platform-tools, and parse-safe .bat steps."
+          else
+            NOTES="Exact-stamp kernel + this build's OWN SIGNED GKI modules (rfkill & USB-net family) auto-loaded by a Magisk module. Fixes the v0.5 finding: kernel rejected Google-signed rfkill.ko ('exports protected symbol rfkill_alloc' -> EPERM), killing the whole WiFi/BT chain. Kit zip includes boot.img, the Magisk fix zip, platform-tools, and the parse-safe .bat steps."
+          fi
           gh release create "$TAG" \
-            --title "S688LN kernel v0.6 signed-modules (${{ inputs.profile }})" \
-            --notes "Exact-stamp kernel + this build's OWN SIGNED GKI modules (rfkill & USB-net family) auto-loaded by a Magisk module. Fixes the v0.5 finding: kernel rejected Google-signed rfkill.ko ('exports protected symbol rfkill_alloc' -> EPERM), killing the whole WiFi/BT chain. Kit zip includes boot.img, the Magisk fix zip, platform-tools, and the parse-safe .bat steps." \
-            "S688LN-kernel-v0.6-signed-modules.zip" \
-            "s688ln-wifi-fix-v0.6.zip" \
+            --title "S688LN kernel ${REL_VER} (${{ inputs.profile }})" \
+            --notes "$NOTES" \
+            "${KIT}.zip" \
+            "$WIFIZIP" \
             "out/SHA256SUMS.txt"

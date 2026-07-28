@@ -1,0 +1,43 @@
+========================================================================
+ S688LN kernel — ksun profile (KernelSU-Next built INTO the kernel)
+ READ THIS FIRST
+========================================================================
+
+WHAT THIS IS
+  A custom S688LN GKI kernel identical to the working v0.6 kernel, PLUS
+  KernelSU-Next v3.3.0 compiled directly into the kernel Image (kprobe
+  hook mode). Root lives inside the kernel — nothing is written to
+  init_boot or vendor_boot. This is an A/B experiment: your v0.6 Magisk
+  kernel is untouched and you can go back to it any time.
+
+WHY THE WiFi-FIX MODULE IS STILL HERE
+  This kernel is self-built, so — exactly like v0.6 — it trusts only its
+  OWN module-signing key and rejects Google's signed rfkill.ko. The
+  included WiFi/BT fix module ships THIS build's own signed rfkill.ko (+
+  usbnet family) and loads them at post-fs-data, then the Unisoc WiFi/BT
+  chain. The module is root-agnostic: it runs under Magisk OR KernelSU.
+
+HOW TO ROOT WITH KERNELSU
+  1. Install the "KernelSU Next" manager app (APK from the KernelSU-Next
+     releases page). Match the manager major version to the kernel
+     (v3.x manager for this v3.3.0 kernel).
+  2. Open the manager AFTER booting this kernel — it should report
+     "Working" with the kernel version. That confirms root.
+  3. Install the WiFi/BT fix module (s688ln-wifi-fix zip) THROUGH the
+     KernelSU manager's Modules tab (or keep it as a Magisk module if you
+     kept Magisk during testing). Reboot.
+
+GOLDEN RULES (unchanged)
+  * NEVER flash blind. First:  fastboot boot boot.img   (temporary).
+    Only if root + WiFi + BT + full boot are all good do you flash.
+  * Flash the KERNEL/boot only, via FASTBOOTD (`fastboot reboot
+    fastboot`). This unit's bootloader-mode fastboot is non-functional.
+  * Never touch init_boot / vendor_boot / thermal.
+
+TEST ORDER
+  STEP-1-CHECK  -> reads state (no writes)
+  fastboot boot boot.img (manual) -> verify KSU manager = Working, WiFi,
+    BT, and that lsmod shows the full chain (~248 modules).
+  STEP-2-FLASH  -> only after the boot-test passes (fastbootd).
+  RESTORE-STOCK-v2 -> panic button back to your stock kernel backup.
+========================================================================

@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 # apply_tuning.sh <profile> <common_dir>
 # Patches gki_defconfig with KMI-conscious tuning for the S26U (T7300).
-# profile: safe | aggressive
+# profile: safe | aggressive | ksun
+#   ksun = safe KMI tier + CONFIG_KSU=y (KernelSU-Next compiled in via kprobe
+#          hooks). The KSU *source* wiring (drivers/ symlink + Kconfig/Makefile)
+#          is done by the workflow's KSU-Next setup.sh step, BEFORE this runs.
+#          Deps (KPROBES, KRETPROBES, HAVE_SYSCALL_TRACEPOINTS, EXT4_FS) are all
+#          already =y in the stock config, so this adds no new subsystem.
 set -euo pipefail
 
-PROFILE="${1:?profile required (safe|aggressive)}"
+PROFILE="${1:?profile required (safe|aggressive|ksun)}"
 COMMON="${2:?path to ACK common/ required}"
 DEFCONFIG="$COMMON/arch/arm64/configs/gki_defconfig"
 
@@ -33,6 +38,19 @@ set_cfg CONFIG_DEFAULT_TCP_CONG '"bbr"'
 # Stock device runs zram default lzo-rle with zstd compiled in -> flip default.
 set_cfg CONFIG_ZRAM_DEF_COMP_ZSTD y
 set_cfg CONFIG_ZRAM_DEF_COMP '"zstd"'
+
+if [ "$PROFILE" = "ksun" ]; then
+  echo "# ---- ksun: KernelSU-Next compiled in (kprobe hooks, additive) ----" >> "$DEFCONFIG"
+  # KSU-Next v3.3.0: `config KSU depends on KPROBES && EXT4_FS`. Both are already
+  # =y in stock; assert them so a config refresh can't silently drop KSU.
+  set_cfg CONFIG_KPROBES y
+  set_cfg CONFIG_KRETPROBES y
+  set_cfg CONFIG_EXT4_FS y
+  # Enable KernelSU (built-in, not a module -> lives inside our signed Image).
+  set_cfg CONFIG_KSU y
+  # Kprobe-based syscall hooks (default when KPROBES is present) — no core-source
+  # patches, so exported-symbol CRCs the vendor modules depend on stay intact.
+fi
 
 if [ "$PROFILE" = "aggressive" ]; then
   echo "# ---- aggressive: ThinLTO + strip debug (KMI-perturbing, probe first) ----" >> "$DEFCONFIG"
