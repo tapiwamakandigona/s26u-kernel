@@ -1,0 +1,64 @@
+name: Build S688LN Restore Kit
+
+# Packages the system-app restore kit (bundled Windows platform-tools + the
+# click-to-run .bat scripts + Linux/macOS restore-all.sh) into a downloadable
+# zip with SHA256SUMS and publishes it as a GitHub Release. Same pattern as the
+# flash-kit CI: assemble on a free public runner, ship as a release asset.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Kit version tag suffix (e.g. v1.0)"
+        type: string
+        default: "v1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Stage kit files
+        run: |
+          set -euo pipefail
+          KIT="S688LN-restore-kit-${{ inputs.version }}"
+          mkdir -p "stage/$KIT/linux-mac"
+          cp restore-kit/READ-ME-FIRST.txt "stage/$KIT/"
+          cp restore-kit/*.bat "stage/$KIT/"
+          cp restore-kit/linux-mac/restore-all.sh "stage/$KIT/linux-mac/"
+          chmod +x "stage/$KIT/linux-mac/restore-all.sh"
+          echo "KIT=$KIT" >> "$GITHUB_ENV"
+
+      - name: Bundle Google platform-tools (adb) for Windows
+        run: |
+          set -euo pipefail
+          curl -fL -o pt.zip https://dl.google.com/android/repository/platform-tools-latest-windows.zip
+          unzip -q pt.zip -d "stage/${KIT}/"
+          # keep only what adb needs; drop fastboot etc. is optional — leave full set
+          ls "stage/${KIT}/platform-tools/adb.exe"
+
+      - name: Zip + checksums
+        run: |
+          set -euo pipefail
+          cd stage
+          zip -qr "../${KIT}.zip" "${KIT}"
+          cd ..
+          sha256sum "${KIT}.zip" > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Publish Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="restore-kit-${{ inputs.version }}"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" \
+            "${KIT}.zip" "SHA256SUMS.txt" \
+            --title "S688LN System-App Restore Kit ${{ inputs.version }}" \
+            --notes "Restore every stock system app on the itel S26 Ultra (itel S688LN, Android 15) without a factory reset or re-flash. Download **${KIT}.zip**, unzip, then run STEP-1-SCAN.bat -> STEP-2-RESTORE-ALL.bat -> STEP-3-VERIFY.bat. Windows adb is bundled. Read READ-ME-FIRST.txt. Only PackageManager is used (install-existing / enable) — no partitions are written. Verify with SHA256SUMS.txt."

@@ -1,0 +1,42 @@
+{
+  "project": "S688LN system-app restore kit",
+  "version": "1.0",
+  "features": [
+    {
+      "id": "scan_readonly",
+      "desc": "STEP-1 reports installed/hidden/disabled counts + full lists, writes nothing to device",
+      "passes": true,
+      "evidence": "STEP-1-SCAN.bat uses only pm list / cmd package list (read-only); syntax validated"
+    },
+    {
+      "id": "restore_hidden_system_apps",
+      "desc": "Re-install every uninstalled-for-user stock system app via cmd package install-existing",
+      "passes": false,
+      "evidence": "ASSUMED-correct: device-side loop over `cmd package list packages -u -s`. On-device run by owner pending."
+    },
+    {
+      "id": "reenable_disabled_apps",
+      "desc": "pm enable every disabled package",
+      "passes": false,
+      "evidence": "ASSUMED-correct: device-side loop over `pm list packages -d`. On-device run by owner pending."
+    },
+    {
+      "id": "magisk_debloat_path",
+      "desc": "List Magisk modules and reversibly disable a debloater (root) to unmask apps",
+      "passes": false,
+      "evidence": "ASSUMED-correct: touch <module>/disable + reboot. Requires owner's Magisk grant; pending."
+    },
+    {
+      "id": "verify_step",
+      "desc": "STEP-3 re-scans and reports 0 hidden / 0 disabled vs baseline",
+      "passes": true,
+      "evidence": "STEP-3-VERIFY.bat read-only diff; syntax validated"
+    },
+    {
+      "id": "ci_builds_and_publishes_kit",
+      "desc": "GitHub Actions bundles platform-tools, zips kit, writes SHA256SUMS, publishes a Release",
+      "passes": false,
+      "evidence": "Set true once a workflow run produces a downloadable release asset with matching SHA256."
+    }
+  ]
+}

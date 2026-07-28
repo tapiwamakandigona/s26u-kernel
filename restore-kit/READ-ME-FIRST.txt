@@ -1,0 +1,85 @@
+============================================================
+  S688LN  SYSTEM-APP RESTORE KIT  v1.0
+  itel S26 Ultra (Super 26 Ultra) / itel S688LN / Android 15
+============================================================
+
+WHAT THIS DOES
+--------------
+Brings back EVERY stock system app you removed while de-skinning,
+WITHOUT a factory reset and WITHOUT re-flashing firmware.
+
+It handles the two ways a system app gets "removed" on this phone:
+
+  1) pm uninstall --user 0  (the usual ADB debloat command)
+     -> the APK was never deleted; it still lives in the read-only
+        /system, /product, /vendor partitions. It was only HIDDEN for
+        your user. Restore = tell PMS to re-install it from that
+        existing copy:  cmd package install-existing <pkg>
+        (NO ROOT NEEDED.)
+
+  2) pm disable-user / pm disable
+     -> app is present but switched off. Restore =  pm enable <pkg>
+        (NO ROOT NEEDED.)
+
+  3) Magisk "systemless" debloat module (a module that mounts an empty
+     folder over an app so it disappears)
+     -> the two commands above CANNOT see it, because the module is
+        masking the file. Restore = disable that Magisk module + reboot.
+        Use RESTORE-MAGISK-DEBLOAT.bat for this (ROOT / Magisk needed).
+
+WHAT IT DOES *NOT* / CANNOT DO
+------------------------------
+- If you had ROOT and physically deleted an APK out of /system (e.g.
+  old-style "System app remover" that rm'd the folder), the file is
+  gone and install-existing cannot recreate it. That app can only come
+  back by a dirty-flash of the stock ROM (data preserved) or a matching
+  system-app APK. This kit will TELL you if that is the case, but it
+  will not touch firmware. Per your golden rules, this kit never writes
+  boot/vendor/system partitions.
+- It only restores STOCK system apps. Play Store / user apps are not
+  in scope.
+
+BEFORE YOU START (2 minutes)
+----------------------------
+1. On the phone: Settings -> About -> tap "Build number" 7x to enable
+   Developer options. Then Developer options -> turn ON "USB debugging".
+2. Plug the phone into this PC with a USB-DATA cable.
+3. First time you connect, the phone shows "Allow USB debugging?" ->
+   tick "Always allow" and tap ALLOW.
+4. Keep the phone SCREEN UNLOCKED while a step runs.
+   (adb.exe is bundled in the platform-tools folder next to these .bat
+    files - you do not need to install anything.)
+
+RUN THEM IN ORDER
+-----------------
+  STEP-1-SCAN.bat            Read-only. Writes NOTHING to the phone.
+                             Reports how many apps are hidden/disabled
+                             and saves the full lists to .\restore-report\
+                             READ THIS FIRST so you know what will change.
+
+  STEP-2-RESTORE-ALL.bat     The fix. Re-enables every disabled app and
+                             re-installs every hidden system app for your
+                             user. Idempotent + safe to re-run.
+
+  STEP-3-VERIFY.bat          Read-only. Confirms 0 hidden / 0 disabled
+                             remain and diffs against the STEP-1 baseline.
+
+  RESTORE-MAGISK-DEBLOAT.bat Optional. Only if some apps are still missing
+                             after a reboot -> lists your Magisk modules so
+                             you can disable a debloater module. (Root.)
+
+Linux / macOS users: use linux-mac/restore-all.sh with your own adb.
+
+SAFETY NOTES
+------------
+- STEP-1 and STEP-3 are strictly read-only.
+- STEP-2 only calls PackageManager (install-existing / enable). It never
+  writes a partition, never flashes, never touches boot/vendor/init_boot.
+- Everything it does is reversible with the normal debloat commands.
+- After STEP-2 finishes, REBOOT the phone once so launcher + icons refresh.
+
+Device this kit was built for (from your evidence 2026-07-22):
+  ro.product.model      : itel S688LN
+  ro.build.fingerprint  : itel/S688LN-OP/itel-S688LN:15/AP3A.240905.015.A2/170005:user/release-keys
+  Android 15 (SDK 35), Magisk root on stock kernel.
+============================================================
