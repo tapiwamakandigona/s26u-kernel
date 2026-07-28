@@ -1,31 +1,24 @@
 # S26U GKI kernel CI
 
-> **v0.5 "EXACT STAMP" — 2026-07-28, owner-approved un-park (one attempt).**
-> New evidence: BOTH flashed kernels (v0.2.1 CI + v0.4 local) reported
-> `6.6.102-android15-8-maybe-dirty-4k` because Kleaf ran **without
-> `--config=stamp`** — the stock `-g1481f357a31c-ab14794947` scmversion was
-> never actually reproduced on-device. The 14 dead WiFi/BT modules are exactly
-> the on-demand set resolved via kernel-release-keyed lookup (GKI
-> `system_dlkm` ships modules in a directory named after `uname -r`), which a
-> `maybe-dirty` uname misses silently — consistent with zero load *attempts*
-> in dmesg. v0.5 = same pinned stock-source build + `--config=stamp` +
-> `BUILD_NUMBER`, with a **hard CI gate** that fails the build unless the
-> release string is byte-identical to stock. Kit (incl. platform-tools +
-> parse-safe .bat steps + rescue.sh manual-insmod fallback) is zipped **on CI**
-> and published as a release. STEP-1 is a read-only on-device check that must
-> confirm the release-keyed directory before any flash.
-
-> **Previous status (2026-07-22): PROJECT PARKED.** v0.2.1 (exact stock source pin
-> `1481f357a31c` / ab14794947, verified checkout, stock profile) flashed OK and
-> booted, but **WiFi and Bluetooth still failed to come up** — identical symptom
-> to v0.1 (toggle flips back off; BT reports on but is off). Conclusion: the
-> Unisoc WCN vendor stack only accepts the *factory-built kernel binary*; even a
-> byte-faithful source rebuild is rejected (suspected: CRC/genksyms or module
-> signing divergence in Google's official build environment that we cannot
-> reproduce). Device restored to stock via UNDO-FASTBOOTD (root intact). No
-> further kernel builds should be flashed. Post-mortem:
-> `evidence/S688LN-2026-07-22/FINDINGS.md`. The de-skin ladder continues via
-> Magisk modules on the stock kernel.
+> ## ✅ SOLVED — WiFi + Bluetooth WORKING on the custom kernel (v0.6, 2026-07-28)
+> Release [`v0.6-stock-run30394576840`](https://github.com/tapiwamakandigona/s26u-kernel/releases/tag/v0.6-stock-run30394576840)
+> boots to full Android with **WiFi and Bluetooth fully functional** — verified
+> on-device (248/248 modules loaded, `wlan0 UP`/`CONNECTED`, evidence in
+> [`evidence/S688LN-2026-07-28/`](evidence/S688LN-2026-07-28/)).
+>
+> The "WCN factory-binary wall" never existed. It was **three stacked root
+> causes**: (1) symbol-CRC drift from building the wrong source tag, (2) the
+> release stamp (`--config=stamp` + `BUILD_NUMBER`) missing so the 14 on-demand
+> WiFi/BT modules were never attempted, and (3) **GKI protected exports +
+> per-build module signing** — the kernel rejected Google-signed `rfkill.ko`
+> (`exports protected symbol rfkill_alloc` → EPERM), and that one keystone
+> module took down the whole WiFi/BT chain. v0.6 = exact-stamp kernel + the
+> **same CI run's own signed** `rfkill.ko`/usbnet kos, insmod'd at post-fs-data
+> by a tiny Magisk module (no-op on stock). Full story:
+> [`evidence/S688LN-2026-07-28/FINDINGS.md`](evidence/S688LN-2026-07-28/FINDINGS.md).
+>
+> The historical banners and the old plan below are kept as the research trail.
+> The 2026-07-22 "PARKED — factory binary wall" conclusion is **REFUTED**.
 
 Free-runner CI that builds a custom **GKI kernel** for the **itel S26 Ultra**
 (S688LN · Unisoc T7300 · ums9360 · Android 15). Actions is billing-blocked on the
@@ -50,8 +43,9 @@ Full analysis: `evidence/S688LN-2026-07-22/FINDINGS.md`.
 
 ## The plan (risk-ordered, one step at a time) — ⚠️ HISTORICAL / SUPERSEDED
 
-> This ladder was followed to its end and **failed at flash time on every profile**
-> (see the PARKED banner at the top). It is kept only as a record of what was tried.
+> This ladder was followed to its end and appeared to fail on every profile —
+> until v0.5/v0.6 found the real root causes (see the SOLVED banner at the top).
+> It is kept only as a record of what was tried.
 > **Do not resume it.** The safe-profile gains (`bbr`, `zstd` zram, KFENCE off) now
 > ship as the **S26U-KernelBoost** Magisk module on the stock kernel instead.
 

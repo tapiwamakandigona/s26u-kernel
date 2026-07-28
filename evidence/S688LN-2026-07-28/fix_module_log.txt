@@ -1,0 +1,26 @@
+== s688ln_wifi_fix post-fs-data Tue Jul 28 23:28:22 CAT 2026 ==
+kernel: 6.6.102-android15-8-g1481f357a31c-ab14794947-4k
+OK rfkill (build-matched signed)
+OK cfg80211 (/vendor_dlkm/lib/modules/cfg80211.ko)
+OK sprd_wlan_combo (/vendor_dlkm/lib/modules/sprd_wlan_combo.ko)
+OK sprdbt_tty (/vendor_dlkm/lib/modules/sprdbt_tty.ko)
+OK mii
+OK usbnet
+OK asix
+OK ax88179_178a
+OK cdc_ether
+OK cdc_eem
+OK cdc_ncm
+OK r8152
+OK r8153_ecm
+OK aqc111
+== done ==
+== s688ln_wifi_fix service.sh (boot_completed) Tue Jul 28 23:28:49 CAT 2026 ==
+-- final module state --
+usbnet 53248 7 aqc111,r8153_ecm,cdc_ncm,cdc_eem,cdc_ether,ax88179_178a,asix, Live 0x0000000000000000
+mii 24576 4 r8152,ax88179_178a,asix,usbnet, Live 0x0000000000000000
+sprdbt_tty 65536 2 - Live 0x0000000000000000
+sprd_wlan_combo 618496 0 - Live 0x0000000000000000
+cfg80211 1114112 1 sprd_wlan_combo, Live 0x0000000000000000
+rfkill 36864 2 sprdbt_tty,cfg80211, Live 0x0000000000000000
+== service.sh done ==
