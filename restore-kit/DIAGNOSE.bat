@@ -62,10 +62,12 @@ echo [3/8] Package paths (APK locations)...
 echo [4/8] Checking for packages whose APK file is GONE (root-deleted)...
 rem Runs on the device: for every package PMS knows (incl. hidden), test
 rem whether its codePath still exists on disk.
-"%ADB%" shell "cmd package list packages -u -f | while read l; do l=${l#package:}; f=${l%%%%=*}; p=${l##*=}; [ -e \"$f\" ] || echo MISSING_FILE:$p:$f; done" > "%D%\08_missing_files.txt"
+rem v1.2 fix: codePaths under /data/app contain '=' padding (base64 dirs), so
+rem cut the ':pkg' off the END (last '='), never truncate the path at the first '='.
+"%ADB%" shell "cmd package list packages -u -f | while read l; do l=${l#package:}; p=${l##*=}; f=${l%%%%=$p}; [ -e \"$f\" ] || echo MISSING_FILE:$p:$f; done" > "%D%\08_missing_files.txt"
 
 echo [5/8] Listing stock app directories on disk...
-"%ADB%" shell "ls -1 /system/app /system/priv-app /product/app /product/priv-app /system_ext/app /system_ext/priv-app /vendor/app 2>/dev/null" > "%D%\09_app_dirs.txt"
+"%ADB%" shell "ls -1 /system/app /system/priv-app /product/app /product/priv-app /product/operator/app /system_ext/app /system_ext/priv-app /vendor/app 2>/dev/null" > "%D%\09_app_dirs.txt"
 
 echo [6/8] Overlay / enabled-state detail (safe, read-only)...
 "%ADB%" shell "pm list packages -e | cut -d: -f2" > "%D%\10_enabled.txt"

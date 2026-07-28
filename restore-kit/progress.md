@@ -36,3 +36,30 @@
   listing, Magisk module+mask inventory, `debloat status` (their module).
 - Note: packages fully forgotten by PMS are invisible to the device scan;
   those get caught later by diffing the logs against the firmware app list.
+
+## 2026-07-28 — v1.2: diagnostics analyzed, tailored restore generated
+- Owner ran DIAGNOSE.bat and returned S688LN-diagnostics.zip (both uploads
+  byte-identical). Device confirmed: S688LN, build 170SP05 OP001PF001AZ.
+- ANALYSIS (all VERIFIED from the logs):
+  * 23 stock apps hidden via uninstall --user 0 (14_hidden.txt; recomputed
+    04-03 diff matches exactly).
+  * 4 apps disabled (05_disabled.txt).
+  * 0 root-deleted system APKs. ALL 89 MISSING_FILE flags were false
+    positives from a DIAGNOSE v1.1 parser bug: `f=${l%%=*}` truncates
+    /data/app/~~<base64>==/ codePaths at the '=' padding. Proof: every
+    flagged path continues with '==/' in 07_paths.txt; zero flags on
+    /system|/product|/system_ext partitions.
+  * 0 Magisk masks (12 empty); De-bloater module enabled but masks nothing.
+  * Baseline diff (restore-kit/baseline_packages_20260721.txt on the private
+    repo) vs current: no stock package forgotten by PMS. Firmware extraction
+    NOT needed for this restore.
+  * 6 apps under /product/operator/app looked absent from 09_app_dirs.txt
+    only because the ls didn't include that dir; all 6 verified installed+enabled.
+- FIXES in DIAGNOSE.bat (v1.2): suffix-based codePath parse
+  (`p=${l##*=}; f=${l%%=$p}`) — VERIFIED clean against all 397 real codePath
+  lines from the owner's 07_paths.txt; added /product/operator/app to the ls.
+- NEW: RESTORE-CUSTOM.bat — tailored plan with the exact 23+4 package lists
+  hardcoded; install-existing + pm enable only; no root, no flashing; ends
+  with on-device verification (pm path per package + disabled count) and
+  prints per-app undo commands. Device-side loops as usual (CRLF-safe).
+- On-device execution by owner pending -> passes:false until confirmed.

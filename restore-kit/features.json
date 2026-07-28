@@ -1,6 +1,6 @@
 {
   "project": "S688LN system-app restore kit",
-  "version": "1.1",
+  "version": "1.2",
   "features": [
     {
       "id": "scan_readonly",
@@ -41,8 +41,20 @@
     {
       "id": "diagnose_collector",
       "desc": "DIAGNOSE.bat collects full read-only inventory (installed/disabled/hidden/APK-file-gone/Magisk masks) into S688LN-diagnostics.zip for offline analysis",
+      "passes": true,
+      "evidence": "VERIFIED: owner ran DIAGNOSE.bat on the S688LN 2026-07-28 and returned S688LN-diagnostics.zip; all 15 files present and parseable. (v1.1 MISSING_FILE check had a parser bug -> fixed in v1.2, see diagnose_parser_fix.)"
+    },
+    {
+      "id": "diagnose_parser_fix",
+      "desc": "v1.2 DIAGNOSE codePath parse no longer false-positives /data/app/~~base64==/ paths; /product/operator/app included in dir listing",
+      "passes": true,
+      "evidence": "VERIFIED: fixed suffix-parse (p=${l##*=}; f=${l%=$p}) simulated against all 397 real codePath lines from owner's 07_paths.txt -> 0 bad parses; v1.1 logic produced 89 false positives, 89/89 confirmed as '=='-padding truncations via 07_paths.txt."
+    },
+    {
+      "id": "tailored_restore_custom",
+      "desc": "RESTORE-CUSTOM.bat restores the exact 23 hidden + 4 disabled packages found on the owner's phone and verifies on-device",
       "passes": false,
-      "evidence": "Syntax reviewed; on-device run by owner pending. Firmware for deleted-APK recovery VERIFIED present: release firmware-S688LN-15.1.2.170SP05 on itel-s26-ultra-Dev (7.35GB split 7z, sha256 cc18ca1d...)."
+      "evidence": "ASSUMED-correct: package lists taken verbatim from owner's 14_hidden.txt/05_disabled.txt; logic mirrors STEP-2 (device-side loops). Awaiting owner run + re-DIAGNOSE showing 0 hidden / 0 disabled."
     }
   ]
 }
