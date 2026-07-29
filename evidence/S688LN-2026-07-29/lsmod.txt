@@ -1,0 +1,248 @@
+Module                  Size  Used by
+aqc111                 24576  0 
+r8153_ecm              12288  0 
+r8152                 155648  1 r8153_ecm
+cdc_ncm                32768  0 
+cdc_eem                12288  0 
+cdc_ether              20480  2 r8153_ecm,cdc_ncm
+ax88179_178a           40960  0 
+asix                   45056  0 
+usbnet                 53248  7 aqc111,r8153_ecm,cdc_ncm,cdc_eem,cdc_ether,ax88179_178a,asix
+mii                    24576  4 r8152,ax88179_178a,asix,usbnet
+sprdbt_tty             65536  2 
+sprd_wlan_combo       618496  0 
+cfg80211             1114112  1 sprd_wlan_combo
+rfkill                 36864  2 sprdbt_tty,cfg80211
+ir_spi                 20480  0 
+tran_util              57344  0 
+tran_health_sched      81920  0 
+trans_sched           167936  2 tran_health_sched
+tran_mm_collect        81920  0 
+sysdumpdb_switch       16384  0 
+thd                    45056  1 
+irq_monitor            40960  0 
+stmvl53l8              57344  0 
+unisoc_freqlink        24576  0 
+unisoc_scufreq         40960  0 
+tmsnfc                 61440  0 
+sprd_power_volt_snr    45056  0 [permanent]
+sprd_suspend_helper    12288  0 
+sprd_pdbg              45056  0 
+mmdvfs                163840  0 
+sprd_camera          1867776  0 
+sprd_sensor           131072  1 sprd_camera
+flash_ic_ocp8137       20480  0 
+cpufreq_userspace      20480  0 
+sprd_flash_drv         53248  1 flash_ic_ocp8137
+tran_ldo               16384  0 
+sprd_camsys_pw_domain    24576  3 mmdvfs,sprd_camera,sprd_sensor
+uniber                 32768  0 
+unisoc_fsio            90112  0 
+kprobe_iomonitor       24576  0 
+iolimit                24576  0 [permanent]
+sla_core               24576  0 
+unisoc_mm_reclaim      40960  0 
+zram                  159744  2 
+zsmalloc               45056  1 zram
+chipsemi_chsc5xxx     225280  0 
+focaltech_ft3683g     225280  0 
+adaptive_ts            69632  2 chipsemi_chsc5xxx,focaltech_ft3683g
+goodix_gt9916_i2c_ts   167936  0 
+nvt_nt36xxx_spi_ts     45056  0 
+focaltech_ft3680_spi_ts   122880  0 
+trusty_tui             20480  2 nvt_nt36xxx_spi_ts,focaltech_ft3680_spi_ts
+sprd_fm                94208  0 
+unisoc_multi_control    12288  0 
+unisoc_gnss_pmnotify_ctl    12288  0 
+unisoc_gnss_dbg        24576  1 
+unisoc_gnss_common_ctl_all    24576  1 unisoc_gnss_pmnotify_ctl
+unisoc_wcn_bsp        540672  4 sprdbt_tty,sprd_wlan_combo,sprd_fm,unisoc_gnss_common_ctl_all
+sprd_touchscreen_ts    20480  3 goodix_gt9916_i2c_ts,nvt_nt36xxx_spi_ts,focaltech_ft3680_spi_ts
+sprd_pmic_dump         16384  0 
+sprd_7sreset           16384  0 
+sprd_pub_vsr           36864  0 
+dmc_drv                28672  0 
+haptic                110592  0 
+sprd_ddr_dvfs          86016  1 unisoc_freqlink
+sprd_cp_dvfs           32768  0 
+audio_platform        208896  5 
+audio_dai             102400  2 
+audio_codec           262144  39 
+tran_audio_aw87xxx    147456  0 
+tran_audio_hl1280      20480  1 audio_codec
+audio_card             77824  7 audio_platform,audio_codec,tran_audio_aw87xxx
+audio_misc            425984  17 audio_platform,audio_dai,audio_card
+musb_sprd              57344  0 
+ums9360_serdes         16384  0 
+mipiserdes_base        24576  1 ums9360_serdes
+sprd_vibra             12288  0 
+tc_otg_ctrl            16384  0 
+tc_auto_test           24576  0 
+tc_chg_type_det        36864  0 
+tc_pd_adapter          20480  0 
+tc_tcpc                20480  0 
+tran_usb_ctrl          36864  0 
+tc_pd_algo             24576  0 
+tc_hvdcp20_algo        28672  0 
+tc_tc30_algo           24576  0 
+tc_pmic                12288  0 
+tc_ta_class            20480  1 tran_usb_ctrl
+tc_gauge               32768  0 
+tc_lcd_notify          12288  0 
+tc_battery             36864  0 
+tc_temp_forecast       12288  0 
+tc_ambient_temp_det    20480  0 
+tc_charger_framework   131072  5 tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_ambient_temp_det
+tc_misc_intf           49152  14 tc_otg_ctrl,tc_auto_test,tc_chg_type_det,tc_pd_adapter,tc_tcpc,tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_gauge,tc_battery,tc_temp_forecast,tc_ambient_temp_det,tc_charger_framework
+jpg                    49152  0 
+tc_tcpc_vdd            12288  1 
+tc_sc8950              45056  0 
+usb_phy_sprd_hs        45056  6 tc_misc_intf
+sprd_bc1p2             28672  1 usb_phy_sprd_hs
+musb_hdrc             192512  3 audio_misc,musb_sprd,usb_phy_sprd_hs
+aw35615_whole         184320  2 tc_pd_adapter,tc_tcpc
+sc27xx_pd              45056  0 
+sc27xx_typec           28672  1 tc_otg_ctrl
+sprd_tcpm             122880  4 tc_pd_adapter,tc_tcpc,sc27xx_pd,sc27xx_typec
+tc_tcpc_notifier       20480  6 tc_otg_ctrl,tc_chg_type_det,tc_pd_adapter,tc_tcpc,tc_charger_framework,tc_tcpc_vdd
+tc_algorithm_class     28672  6 tc_auto_test,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_charger_framework,tc_misc_intf
+tc_adapter_class       20480  6 tc_otg_ctrl,tc_pd_adapter,tc_pd_algo,tc_misc_intf,aw35615_whole,sc27xx_pd
+tc_charger_class       57344  15 tc_otg_ctrl,tc_auto_test,tc_chg_type_det,tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_gauge,tc_battery,tc_temp_forecast,tc_ambient_temp_det,tc_charger_framework,tc_misc_intf,tc_tcpc_vdd,tc_sc8950
+ump965x_fuel_gauge    106496  0 
+sprd_battery_info      28672  1 ump965x_fuel_gauge
+tc_common_class        24576  20 tc_otg_ctrl,tc_auto_test,tc_chg_type_det,tc_tcpc,tran_usb_ctrl,tc_pd_algo,tc_hvdcp20_algo,tc_tc30_algo,tc_pmic,tc_gauge,tc_lcd_notify,tc_battery,tc_temp_forecast,tc_ambient_temp_det,tc_charger_framework,tc_misc_intf,sprd_bc1p2,aw35615_whole,sprd_tcpm,ump965x_fuel_gauge
+sprd_third_battery_fuel    12288  0 
+sprd_bcl               12288  0 
+sprd_core_ctrl         12288  0 
+sprd_freq_limit        20480  0 
+sprd_usbpinmux         20480  2 musb_sprd,usb_phy_sprd_hs
+sprd_dpdm              12288  0 
+extcon_usb_gpio        12288  0 
+sprd_uid               12288  0 
+sprd_pmic_wdt          12288  0 
+sprd_virt_thm          12288  0 
+sprd_shell_thm         16384  0 
+sprd_ambient_thm       12288  0 
+thermal_generic_adc    12288  0 
+sc27xx_poweroff        16384  0 
+sprd_leds_bltc         12288  0 
+ledtrig_pattern        12288  0 
+vpu                    77824  1 
+sprd_vsp_pw_domain     16384  0 
+sprd_faceid            16384  0 
+sprd_map               24576  0 
+system_heap            24576  168 [permanent]
+unisoc_userlog         16384  4 
+cma_heap               24576  0 [permanent]
+ion_ipc_trusty         24576  1 cma_heap
+sprd_dmabuf            32768  1 sprd_camera
+sprd_pmic_syscon       16384  0 
+sprd_pmic_adc          57344  0 
+sprd_coresight_apetb_main    12288  0 
+sprd_coresight_apetb_ctrl    16384  1 sprd_coresight_apetb_main
+sprd_coresight_etm4x    86016  1 sprd_coresight_apetb_ctrl
+sprd_coresight_replicator    24576  0 
+sprd_coresight_funnel    24576  0 
+sprd_coresight_tmc     53248  1 sprd_coresight_apetb_ctrl
+sprd_coresight         94208  5 sprd_coresight_apetb_main,sprd_coresight_etm4x,sprd_coresight_replicator,sprd_coresight_funnel,sprd_coresight_tmc
+unisoc_aphang          49152  0 
+pinctrl                16384  0 
+goodix_fp              36864  3 
+sprd_drm              954368  6 unisoc_mm_reclaim,adaptive_ts,nvt_nt36xxx_spi_ts,goodix_fp
+tran_key_bigdata       20480  1 sprd_drm
+sprd_gsp              376832  1 sprd_drm
+apsys_dvfs            270336  4 jpg,vpu,sprd_drm,sprd_gsp
+unisoc_iommu           94208  6 sprd_camera,jpg,vpu,system_heap,sprd_drm,sprd_gsp
+gpio                   16384  0 
+core                   16384  2 pinctrl,gpio
+sprd_ump9360_tsensor    20480  1 unisoc_gnss_common_ctl_all
+sgd                    12288  0 
+kts_sync               12288  0 
+mali_kbase           1155072  88 
+sprd_cpu_cooling       40960  0 
+unisoc_last_kmsg       53248  1 unisoc_aphang
+unisoc_mm_emem         28672  3 zram,system_heap,mali_kbase
+unisoc_mm_ummd         16384  0 
+sprd_shm               24576  0 
+unisoc_bootinfo        24576  0 
+trusty_virtio          24576  0 
+trusty_ipc             49152  27 sprd_camera,unisoc_wcn_bsp,ion_ipc_trusty
+trusty_irq             28672  0 
+trusty_log             28672  0 
+trusty_pm              16384  0 [permanent]
+trusty                 36864  8 sprd_drm,sprd_gsp,mali_kbase,sprd_shm,trusty_virtio,trusty_irq,trusty_log,trusty_pm
+trangpio               20480  0 
+tkv_recovery           53248  0 
+tkv                    53248  0 
+tran_rhi               24576  0 
+hiber                  28672  1 
+tran_hwinfo            16384  3 adaptive_ts,goodix_fp,sprd_drm,[permanent]
+tranbootprof           24576  0 
+kprobe_dmverity_debug    16384  0 [permanent]
+sprd_usb_f_rndis       49152  2 
+sprd_usb_f_serial      20480  16 
+sprd_u_serial          36864  5 sprd_usb_f_serial
+sprd_wdt_fiq           24576  1 unisoc_aphang
+pwm_sprd               20480  0 
+sensorhub              40960  3 
+sensorhub_sipc         28672  1 sensorhub
+dfi_core               36864  0 
+ims_bridge            102400  0 
+seth                   36864  0 
+kfifo_buf              20480  1 sensorhub
+slog_bridge            24576  0 
+sprd_iq                24576  0 
+sprd_usb_f_vser        45056  4 slog_bridge,sprd_iq
+sprd_cp_dump           20480  0 
+sprd_modem_loader      36864  1 
+sipx                   45056  1 seth
+spool                  24576  0 
+spipe                  20480  19 
+sipc_core             180224  18 sprdbt_tty,sprd_wlan_combo,sprd_pdbg,sprd_fm,unisoc_wcn_bsp,sprd_ddr_dvfs,sprd_cp_dvfs,sprd_pmic_wdt,sprd_drm,sensorhub_sipc,ims_bridge,seth,slog_bridge,sprd_iq,sprd_modem_loader,sipx,spool,spipe
+sprd_sipc_virt_bus     12288  0 
+unisoc_mailbox         36864  6 sipc_core,[permanent]
+sprd_trng              20480  0 
+sprd_power_manager     36864  2 sprd_modem_loader,sipc_core
+unisoc_time_sync       24576  3 sprd_pdbg,sensorhub
+timer_sprd             24576  0 [permanent]
+pinctrl_sprd_ums9360    40960  0 
+pinctrl_sprd           28672  1 pinctrl_sprd_ums9360
+sprd_cpufreq_v2        45056  0 [permanent]
+sprd_ase_generic       12288  0 [permanent]
+sprd_ase_driver        36864  0 [permanent]
+sprd_soc_thm           57344  1 sprd_cpufreq_v2
+sprd_thm_r5p0          24576  0 
+sdhci_sprd            208896  2 unisoc_fsio,unisoc_wcn_bsp
+cqhci                 102400  2 unisoc_fsio,sdhci_sprd
+mmc_hsq                20480  1 sdhci_sprd
+mmc_swcq               49152  1 sdhci_sprd
+ufs_sprd              278528  1 unisoc_fsio
+tran_proc_bootdevice_mod    36864  1 ufs_sprd
+tnek                   20480  11 tran_util,tran_health_sched,tran_mm_collect,thd,adaptive_ts,unisoc_wcn_bsp,tran_key_bigdata,trusty_ipc,trusty_log,ufs_sprd
+transsion_trancare     53248  17 tran_util,tran_health_sched,tran_mm_collect,thd,zram,adaptive_ts,unisoc_wcn_bsp,tc_charger_framework,tran_key_bigdata,trusty_ipc,trusty_log,ufs_sprd
+rpmb                   32768  1 ufs_sprd
+ump9360_regulator      49152  32 
+nvmem_sprd_shadow_efuse    20480  1 
+nvmem_sprd_efuse       20480  0 
+spi_sprd               32768  0 
+sprd_soc_id            20480  2 unisoc_wcn_bsp,apsys_dvfs
+unisoc_sched          217088  6 trans_sched,unisoc_mm_reclaim,sprd_core_ctrl,sprd_cpu_cooling,[permanent]
+i2c_sprd               32768  0 
+sprd_dma               32768  0 
+gpio_pmic_eic_sprd     12288  10 
+gpio_eic_sprd          28672  6 
+gpio_sprd              20480  24 
+rtc_sc27xx             20480  1 
+sprd_pmic_mfd          16384  0 
+unisoc_pmu_sample      36864  3 unisoc_freqlink,unisoc_scufreq,unisoc_sched
+sprd_spi_adi           28672  0 
+native_hang_monitor    36864  2 
+sprd_cache_print       16384  0 
+sysdump               118784  15 dmc_drv,sprd_ddr_dvfs,unisoc_aphang,unisoc_last_kmsg,trusty_log,sprd_wdt_fiq,sprd_cp_dump,sipc_core,ufs_sprd,ump9360_regulator,sprd_pmic_mfd,sprd_spi_adi,native_hang_monitor
+sprd_hwspinlock        20480  2 
+ums9360_clk           122880  182 
+sprd_sip_svc           24576  6 sprd_pdbg,sprd_pmic_wdt,unisoc_aphang,mali_kbase,unisoc_bootinfo,sprd_cpufreq_v2,[permanent]
+clk_sprd               28672  1 ums9360_clk
+debug_symbol           16384  3 irq_monitor,unisoc_last_kmsg,sysdump,[permanent]
+regmap_hook            16384  0 [permanent]
+printk_cpuid           16384  0 

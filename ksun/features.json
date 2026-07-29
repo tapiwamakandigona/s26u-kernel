@@ -47,8 +47,8 @@
     {
       "id": "on-device-verified",
       "desc": "OWNER-only gate: fastboot boot the ksun boot.img -> KSU root works + WiFi + BT + 248 modules. Not flashed blind.",
-      "passes": false,
-      "evidence": "pending owner test"
+      "passes": true,
+      "evidence": "VERIFIED on-device 2026-07-29 (owner report + evidence/S688LN-2026-07-29/): v0.7.1 ksun boots; KSU-Next manager 'Working / BUILT-IN (GKI2)' v3.3.0 (33214-2); 5 modules loaded; lsmod = 248 modules (stock count) with rfkill 2 sprdbt_tty,cfg80211 chain up; wlan0 UP; WiFi+BT switches on; SELinux Enforcing; Magisk fully uninstalled."
     }
   ]
 }

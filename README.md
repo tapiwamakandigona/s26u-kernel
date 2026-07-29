@@ -71,8 +71,11 @@ Artifacts (`Image`, `boot.img`, `System.map`, `SHA256SUMS.txt`) attach to the ru
   reboot and you're back on stock — nothing was written.
 - Only ever swap the **kernel** in boot.img. **Never** touch `init_boot`,
   `vendor_boot`, or thermal.
-- Keep Magisk for root (don't rebuild root into the kernel). KernelSU upstream
-  dropped built-in/GKI mode; susfs on 6.6 GKI is experimental.
+- **Root is in the kernel as of v0.7.1** (`ksun` profile: KernelSU-Next v3.3.0,
+  built-in/GKI2, verified on-device 2026-07-29 — Magisk since uninstalled). The
+  older "keep Magisk, don't rebuild root into the kernel" rule is obsolete.
+- susfs is still NOT integrated (deferred for CRC risk, see `ksun/PROJECT.md`);
+  it would be a separate `ksun-susfs` profile.
 
 *Source of truth for the whole S26U project lives in the private repo
 `itel-s26-ultra-Dev`.*
