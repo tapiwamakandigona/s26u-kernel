@@ -290,6 +290,36 @@ jobs:
             exit 1
           fi
 
+      - name: Verify v0.8 tier-A tuning landed (ksun hard gate)
+        if: ${{ inputs.profile == 'ksun' }}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          # The built .config must show all five EFFECTIVE v0.8 values:
+          # the two choice selectors, the two derived strings they compute,
+          # and KFENCE sampling off. Fails the build otherwise.
+          CFG="$(find android-kernel dist -name '.config' -type f 2>/dev/null | head -1)"
+          if [ -z "$CFG" ]; then
+            echo "::error::No built .config found; cannot verify v0.8 tuning. Aborting."
+            exit 1
+          fi
+          FAIL=0
+          for want in \
+            'CONFIG_DEFAULT_BBR=y' \
+            'CONFIG_DEFAULT_TCP_CONG="bbr"' \
+            'CONFIG_ZRAM_DEF_COMP_ZSTD=y' \
+            'CONFIG_ZRAM_DEF_COMP="zstd"' \
+            'CONFIG_KFENCE_SAMPLE_INTERVAL=0'
+          do
+            if grep -qxF "$want" "$CFG"; then
+              echo "PASS: $want"
+            else
+              echo "::error::MISSING in built .config: $want"
+              FAIL=1
+            fi
+          done
+          [ "$FAIL" = "0" ] || { echo "::error::v0.8 tier-A tuning gate FAILED."; exit 1; }
+          echo "v0.8 tier-A tuning confirmed in $CFG"
+
       - name: Verify kernel version string vs stock
         run: |
           cd "$GITHUB_WORKSPACE"

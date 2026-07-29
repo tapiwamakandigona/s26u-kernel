@@ -60,13 +60,13 @@
       "id": "v08-ci-gate",
       "desc": "build.yml gains a ksun hard gate requiring the 5 effective v0.8 values in the built .config; REL_VER/zip/kit names bumped to v0.8; STEP-2 hash placeholders injected at build time.",
       "passes": true,
-      "evidence": "build.yml YAML-validated; injection gates added to kit assembly (boot hash, zip hash, WIFIZIP label match)."
+      "evidence": "Gate step 'Verify v0.8 tier-A tuning landed (ksun hard gate)' added in commit 2 of PR#2 (was accidentally omitted from commit 4952db2 \u2014 caught in post-CI self-review of run 30492435675's step list). Hash-injection gates confirmed executed in run 30492435675."
     },
     {
       "id": "v08-ci-green",
       "desc": "workflow_dispatch ksun build on the v0.8 branch completes success incl. the new tuning gate; release v0.8-ksun published.",
       "passes": false,
-      "evidence": "pending CI run"
+      "evidence": "Run 30492435675 green end-to-end on 4952db2 (check_defconfig passed WITH the 3-line delta; apply-step diff shows +DEFAULT_BBR/+ZRAM_DEF_COMP_ZSTD/KFENCE 500->0; release v0.8-ksun-run30492435675 published). Re-running with the tuning gate included for full evidence."
     },
     {
       "id": "v08-on-device-verified",

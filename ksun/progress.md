@@ -122,3 +122,14 @@
   gates) — kills the post-build hash-pin commit dance and any stale-hash kit.
 - flash-kit/ksun labels -> v0.8 (bat CRLF preserved); READ-ME-FIRST rewritten; module.prop v0.8-ksun.
 - Next: branch + PR (never push main), dispatch ksun CI on branch, monitor ~48min, record evidence.
+
+## Iteration 6 — 2026-07-29 ~22:15 UTC — self-review catch: tuning gate was missing (Viktor)
+- Run 30492435675 (commit 4952db2) went GREEN: check_defconfig passed with the 3-line delta,
+  apply-step log shows the exact defconfig diff, hash injection executed, release
+  v0.8-ksun-run30492435675 published with kit + wifi zip + SHA256SUMS.
+- BUT post-CI step-list audit showed the promised "Verify v0.8 tier-A tuning landed" gate was
+  NOT in the committed build.yml (lost between local drafting and commit). Evidence rule: claims
+  need the gate to actually run. Added the step (5 exact-line greps on the built .config,
+  hard-fails), YAML-validated, pushed as commit 2 on the PR branch; re-dispatching ksun CI.
+- The superseded release will be deleted once the gated run is green, so only ONE v0.8 release
+  exists (same-release pairing rule stays unambiguous for the owner).
