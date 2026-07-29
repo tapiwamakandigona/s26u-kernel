@@ -71,3 +71,28 @@
   (OWNER gate — fastboot boot only, never flash blind).
 - Learning: iteration-1 `check_defconfig` failure taught: gki_defconfig deltas must be minimal (no default-y
   entries like CONFIG_KSU=y) and menu-ordered; `insert_before()` anchor approach in apply_tuning.sh is the pattern.
+
+## Iteration 4 — 2026-07-29 ~06:00 UTC — v0.7.1: fix KSU "version 1 too low" + WiFi/BT diagnosis (Viktor)
+- OWNER on-device report (booted v0.7-ksun via fastboot boot): (a) KSU-Next manager
+  shows "current kernel su next version 1 is too low ... upgrade 33188"; (b) WiFi + BT dead.
+- Logs attached (S688LN-check/logs zips, uname=...-dirty, timestamps 07/29 07:39 CAT => THIS ksun boot):
+  - dmesg VERIFIED: `KernelSU: handle_setresuid from 0 to 1000/10077/...` => KSU root IS working on-device.
+  - dmesg VERIFIED: `rfkill: exports protected symbol rfkill_alloc` then `cfg80211/sprdbt_tty: Unknown
+    symbol rfkill_alloc (err -2)` => the v0.5 signing-trust wall. rfkill.ko rejected (EPERM /
+    "Permission denied" in fix_module_log) => whole WiFi/BT chain fails.
+- ROOT CAUSE 1 (version=1): KernelSU-Next/kernel/Kbuild derives KSU_VERSION from
+  `git rev-list --count HEAD`; Kleaf's HERMETIC SANDBOX omits .git => in-build git fails =>
+  Kbuild takes `KSU_VERSION_FALLBACK := 1`. v3.3.0 real count = 3214 => correct code 30000+3214 = 33214.
+  Manager v3.3.0 APK is literally `KernelSU_Next_v3.3.0_33214-release.apk` (wants kernel >= 33188).
+- FIX 1 (VERIFIED locally, sed simulated on real v3.3.0 Kbuild): in the ksun integration step, after
+  setup.sh, compute count on the RUNNER (full clone) and sed the Kbuild fallbacks:
+  KSU_VERSION_FALLBACK := 33214, KSU_VERSION_TAG_FALLBACK := v3.3.0. Hard gate: numeric + >= 33188 +
+  patch-applied grep. Export KSU_CODE to GITHUB_ENV for release notes. YAML parses (17 steps).
+- ROOT CAUSE 2 (WiFi/BT): NOT the version. Module signing key is PER-BUILD (no checked-in key => Kleaf
+  auto-gens per run). The wifi-fix module that ran was signed by a DIFFERENT run's key than the booted
+  v0.7-ksun kernel (almost certainly the stale v0.6 s688ln_wifi_fix still in /data/adb/modules) =>
+  kernel refuses rfkill.ko's protected-symbol exports. FIX: use boot.img + wifi-fix zip FROM THE SAME
+  RELEASE, remove the old module first. Release notes updated to state this loudly.
+- Naming bumped to v0.7.1 (REL_VER + WIFIZIP + KIT) so the new release/keys are unambiguous vs v0.7.
+- Next: commit, push, trigger ksun CI, monitor, record evidence; then owner: fastboot boot new boot.img +
+  install matched v0.7.1 wifi-fix zip + v3.3.0 manager APK.

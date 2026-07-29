@@ -70,11 +70,11 @@ jobs:
         run: |
           if [ "${{ inputs.profile }}" = "ksun" ]; then
             {
-              echo "REL_VER=v0.7"
+              echo "REL_VER=v0.7.1"
               echo "MODULE_SRC=flash-kit/ksun/module"
               echo "KIT_SRC=flash-kit/ksun"
-              echo "WIFIZIP=s688ln-wifi-fix-v0.7-ksun.zip"
-              echo "KIT=S688LN-kernel-v0.7-ksun"
+              echo "WIFIZIP=s688ln-wifi-fix-v0.7.1-ksun.zip"
+              echo "KIT=S688LN-kernel-v0.7.1-ksun"
             } >> "$GITHUB_ENV"
           else
             {
@@ -158,6 +158,32 @@ jobs:
           bash ksun_setup.sh "${KSUN_TAG}"
           echo "== KSU-Next version ref =="
           git -C KernelSU-Next --no-pager log -1 --format='%H %d %s' || true
+          # ---- FIX (v0.7.1): bake the REAL KSU-Next version into the Kbuild ----
+          # KernelSU-Next/kernel/Kbuild derives its version from `git rev-list
+          # --count HEAD`. Kleaf builds in a HERMETIC SANDBOX that does NOT copy
+          # the .git dirs, so that git call fails in-build and the Kbuild takes
+          # its `KSU_VERSION_FALLBACK := 1` branch. On-device the KSU-Next
+          # manager then reports "version 1 too low" and refuses to work.
+          # Fix: compute the true commit count HERE on the runner (full clone,
+          # git works) and bake it into BOTH fallbacks so the sandboxed build
+          # reports the correct version. expr uses the same 30000+count formula
+          # as the Kbuild (v3.3.0 => 30000+3214 = 33214).
+          KSU_COUNT="$(git -C KernelSU-Next rev-list --count HEAD)"
+          KSU_CODE="$(expr 30000 + "$KSU_COUNT")"
+          echo "KSU-Next commit count=$KSU_COUNT -> KSU_VERSION=$KSU_CODE"
+          KB="common/drivers/kernelsu/Kbuild"   # symlink -> KernelSU-Next/kernel/Kbuild
+          sed -i \
+            -e "s/^KSU_VERSION_FALLBACK := .*/KSU_VERSION_FALLBACK := ${KSU_CODE}/" \
+            -e "s/^KSU_VERSION_TAG_FALLBACK := .*/KSU_VERSION_TAG_FALLBACK := ${KSUN_TAG}/" \
+            "$KB"
+          echo "== patched Kbuild fallback lines =="
+          grep -nE "FALLBACK :=" "$KB"
+          grep -q "^KSU_VERSION_FALLBACK := ${KSU_CODE}$" "$KB" || {
+            echo "::error::KSU version fallback patch did not apply."; exit 1; }
+          case "$KSU_CODE" in ''|*[!0-9]*) echo "::error::KSU_CODE '$KSU_CODE' not numeric."; exit 1;; esac
+          [ "$KSU_CODE" -ge 33188 ] || {
+            echo "::error::KSU_CODE $KSU_CODE below manager minimum 33188."; exit 1; }
+          echo "KSU_CODE=$KSU_CODE" >> "$GITHUB_ENV"
           echo "== driver wiring =="
           grep -n kernelsu common/drivers/Makefile common/drivers/Kconfig || {
             echo "::error::KSU-Next wiring missing from common/drivers - setup.sh failed."; exit 1; }
@@ -391,7 +417,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           TAG="${REL_VER}-${{ inputs.profile }}-run${{ github.run_id }}"
           if [ "${{ inputs.profile }}" = "ksun" ]; then
-            NOTES="Exact-stamp kernel with KernelSU-Next ${KSUN_TAG} compiled IN (kprobe hooks, additive; root lives in the signed Image, init_boot untouched). Still ships this build's OWN SIGNED rfkill.ko + usbnet family (self-built kernel rejects Google-signed modules) via a root-agnostic post-fs-data loader that runs under Magisk OR KernelSU. A/B experiment: fastboot boot ONLY, verify KSU manager=Working + WiFi + BT + ~248 modules before flashing. Kit includes boot.img, the fix module zip, platform-tools, and parse-safe .bat steps."
+            NOTES="v0.7.1: fixes the KernelSU-Next manager 'version 1 too low' warning (Kleaf's hermetic sandbox strips .git so the Kbuild version detector fell back to 1; we now bake the real ${KSUN_TAG} version = ${KSU_CODE} into the build). Use the KernelSU-Next ${KSUN_TAG} manager APK (reports 33214). Exact-stamp kernel with KernelSU-Next ${KSUN_TAG} compiled IN (kprobe hooks, additive; root lives in the signed Image, init_boot untouched). Ships THIS build's OWN SIGNED rfkill.ko + usbnet family via a root-agnostic post-fs-data loader (Magisk OR KernelSU). CRITICAL: the module signing key is per-build, so you MUST use the boot.img and the wifi-fix zip FROM THIS SAME RELEASE together, and remove any older s688ln_wifi_fix module first (a stale zip from another run is rejected -> 'rfkill: exports protected symbol rfkill_alloc' -> no WiFi/BT). A/B: fastboot boot ONLY, verify KSU manager=Working + WiFi + BT + ~248 modules before flashing. Kit includes boot.img, the matched fix module zip, platform-tools, and parse-safe .bat steps."
           else
             NOTES="Exact-stamp kernel + this build's OWN SIGNED GKI modules (rfkill & USB-net family) auto-loaded by a Magisk module. Fixes the v0.5 finding: kernel rejected Google-signed rfkill.ko ('exports protected symbol rfkill_alloc' -> EPERM), killing the whole WiFi/BT chain. Kit zip includes boot.img, the Magisk fix zip, platform-tools, and the parse-safe .bat steps."
           fi
