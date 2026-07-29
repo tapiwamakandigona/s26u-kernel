@@ -1,31 +1,41 @@
 ========================================================================
- S688LN kernel — ksun profile (KernelSU-Next built INTO the kernel)
+ S688LN kernel v0.8 — ksun profile (KernelSU-Next + tier-A tuning built IN)
  READ THIS FIRST
 ========================================================================
 
 WHAT THIS IS
-  A custom S688LN GKI kernel identical to the working v0.6 kernel, PLUS
-  KernelSU-Next v3.3.0 compiled directly into the kernel Image (kprobe
-  hook mode). Root lives inside the kernel — nothing is written to
-  init_boot or vendor_boot. This is an A/B experiment: your v0.6 Magisk
-  kernel is untouched and you can go back to it any time.
+  A custom S688LN GKI kernel built from the exact stock source with:
+    * KernelSU-Next v3.3.0 compiled directly into the kernel Image
+      (kprobe hook mode). Root lives inside the kernel — nothing is
+      written to init_boot or vendor_boot.
+    * v0.8 NEW: the tier-A tuning is now a FACTORY DEFAULT in the kernel
+      instead of only a runtime module write:
+        - default TCP congestion control:  bbr   (stock: cubic)
+        - default zram compressor:         zstd  (stock: lzo-rle)
+        - KFENCE memory-error sampling:    OFF   (stock: 500 ms)
+      These change ONLY default values — no driver/ABI changes — so the
+      vendor WiFi/BT modules load exactly like before. Your S26U-Flow /
+      KernelBoost module keeps working; it now just confirms the same
+      values at boot.
 
 WHY THE WiFi-FIX MODULE IS STILL HERE
-  This kernel is self-built, so — exactly like v0.6 — it trusts only its
-  OWN module-signing key and rejects Google's signed rfkill.ko. The
-  included WiFi/BT fix module ships THIS build's own signed rfkill.ko (+
-  usbnet family) and loads them at post-fs-data, then the Unisoc WiFi/BT
-  chain. The module is root-agnostic: it runs under Magisk OR KernelSU.
+  This kernel is self-built, so it trusts only its OWN module-signing
+  key and rejects Google's signed rfkill.ko. The included WiFi/BT fix
+  module ships THIS build's own signed rfkill.ko (+ usbnet family) and
+  loads them at post-fs-data, then the Unisoc WiFi/BT chain. The module
+  is root-agnostic: it runs under KernelSU OR Magisk.
+  CRITICAL: signing keys are PER-BUILD. Use the boot.img and the
+  wifi-fix zip from THIS SAME kit together — a zip from any older
+  release is rejected ("rfkill: exports protected symbol") and WiFi/BT
+  dies. STEP-2 checks the hashes for you before flashing.
 
 HOW TO ROOT WITH KERNELSU
-  1. Install the "KernelSU Next" manager app (APK from the KernelSU-Next
-     releases page). Match the manager major version to the kernel
-     (v3.x manager for this v3.3.0 kernel).
+  1. Install the "KernelSU Next" manager app (v3.3.0 APK, reports
+     version 33214 with this kernel).
   2. Open the manager AFTER booting this kernel — it should report
-     "Working" with the kernel version. That confirms root.
-  3. Install the WiFi/BT fix module (s688ln-wifi-fix zip) THROUGH the
-     KernelSU manager's Modules tab (or keep it as a Magisk module if you
-     kept Magisk during testing). Reboot.
+     "Working". That confirms root.
+  3. Install the WiFi/BT fix module (the zip in this kit) THROUGH the
+     KernelSU manager's Modules tab. Reboot.
 
 GOLDEN RULES (unchanged)
   * NEVER flash blind. First:  fastboot boot boot.img   (temporary).

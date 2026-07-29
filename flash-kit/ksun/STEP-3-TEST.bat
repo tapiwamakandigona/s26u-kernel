@@ -1,10 +1,10 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title S688LN v0.7.1-ksun - STEP 3 TEST - this window stays open
+title S688LN v0.8-ksun - STEP 3 TEST - this window stays open
 color 0B
 echo ==============================================================
-echo   STEP 3 - TEST after the v0.7.1-ksun flash.
+echo   STEP 3 - TEST after the v0.8-ksun flash.
 echo   Checks WiFi/BT and the fix module, then packs all logs
 echo   for Viktor. Read-only - changes nothing on the phone.
 echo ==============================================================

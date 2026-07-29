@@ -1,10 +1,10 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title S688LN v0.7.1-ksun - STEP 1 CHECK - read-only, writes NOTHING to the phone
+title S688LN v0.8-ksun - STEP 1 CHECK - read-only, writes NOTHING to the phone
 color 0B
 echo ==============================================================
-echo   STEP 1 - CHECK  v0.7.1-ksun   -- READ-ONLY, writes NOTHING.
+echo   STEP 1 - CHECK  v0.8-ksun   -- READ-ONLY, writes NOTHING.
 echo   This window never closes by itself.
 echo ==============================================================
 echo.

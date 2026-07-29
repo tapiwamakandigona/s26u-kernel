@@ -1,6 +1,6 @@
 id=s688ln_wifi_fix
 name=S688LN WiFi+BT Fix (build-matched rfkill, root-agnostic)
-version=v0.7-ksun
-versionCode=7
+version=v0.8-ksun
+versionCode=8
 author=Viktor
 description=Loads the build-matched SIGNED rfkill.ko plus the Unisoc WiFi/BT module chain on a self-built exact-stamp custom kernel. Runs under Magisk OR KernelSU (same post-fs-data/service scripts). No-op on the stock kernel (guard: skips when rfkill is already loaded). Same id as the v0.6 module so it is a drop-in on the ksun (KernelSU) kernel.

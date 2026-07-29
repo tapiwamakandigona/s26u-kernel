@@ -49,6 +49,30 @@
       "desc": "OWNER-only gate: fastboot boot the ksun boot.img -> KSU root works + WiFi + BT + 248 modules. Not flashed blind.",
       "passes": false,
       "evidence": "pending owner test"
+    },
+    {
+      "id": "v08-tier-a-defconfig",
+      "desc": "apply_tuning.sh ksun bakes tier-A defaults canonically: CONFIG_DEFAULT_BBR=y after TCP_CONG_BBR, CONFIG_ZRAM_DEF_COMP_ZSTD=y after ZRAM=m, KFENCE_SAMPLE_INTERVAL 500->0 in place; no promptless strings written.",
+      "passes": true,
+      "evidence": "VERIFIED locally 2026-07-29 on pinned tree 1481f357a31c + KSU-Next v3.3.0 wiring: real `make savedefconfig` delta vs edited file == pristine baseline delta (only pre-existing toolchain-gated omissions); .config carries all 5 effective values + CONFIG_KSU=y."
+    },
+    {
+      "id": "v08-ci-gate",
+      "desc": "build.yml gains a ksun hard gate requiring the 5 effective v0.8 values in the built .config; REL_VER/zip/kit names bumped to v0.8; STEP-2 hash placeholders injected at build time.",
+      "passes": true,
+      "evidence": "build.yml YAML-validated; injection gates added to kit assembly (boot hash, zip hash, WIFIZIP label match)."
+    },
+    {
+      "id": "v08-ci-green",
+      "desc": "workflow_dispatch ksun build on the v0.8 branch completes success incl. the new tuning gate; release v0.8-ksun published.",
+      "passes": false,
+      "evidence": "pending CI run"
+    },
+    {
+      "id": "v08-on-device-verified",
+      "desc": "OWNER-only gate: fastboot boot v0.8 boot.img -> KSU Working + WiFi + BT + ~248 modules; defaults show bbr/zstd/kfence=0 with no module writes.",
+      "passes": false,
+      "evidence": "pending owner test"
     }
   ]
 }

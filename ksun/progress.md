@@ -96,3 +96,29 @@
 - Naming bumped to v0.7.1 (REL_VER + WIFIZIP + KIT) so the new release/keys are unambiguous vs v0.7.
 - Next: commit, push, trigger ksun CI, monitor, record evidence; then owner: fastboot boot new boot.img +
   install matched v0.7.1 wifi-fix zip + v3.3.0 manager APK.
+
+## Iteration 5 — 2026-07-29 ~21:30 UTC — v0.8: tier-A defaults baked into the kernel (Viktor)
+- Owner directive: "do thorough research on how kernels are made n work, then make the kernel
+  update, no errors, be autonomous." Read harness v3.0.1 (subagent-toolkit tag) — single agent, evidence-first.
+- RESEARCH (all VERIFIED against primary sources, write-up: docs/how-gki-kernels-work.md):
+  GKI/KMI/module-signing model (source.android.com), BBR-vs-cubic on lossy/satellite links
+  (arXiv:2607.07133 Starlink study; WPI testbed), zstd-vs-lzo-rle zram (LWN 973757), KFENCE
+  default-off semantics (lib/Kconfig.kfence help text at pinned SHA).
+- PINNED-SOURCE FACTS (1481f357a31c, fetched from android.googlesource): stock gki_defconfig has
+  TCP_CONG_BBR=y:163, CRYPTO_ZSTD=y:741, ZRAM=m:331, KFENCE_SAMPLE_INTERVAL=500:777; choice
+  defaults are DEFAULT_CUBIC and ZRAM_DEF_COMP_LZORLE.
+- LOCAL RIG (no CI guessing): downloaded the full pinned tree tarball, built flex/bison/m4 from
+  source, replicated KSU setup.sh wiring (v3.3.0 clone). Pristine savedefconfig vs committed file
+  = 8 toolchain-gated omissions (baseline D0; Kleaf's clang env has them all — CI-green v0.7.1
+  proves it). ksun v0.7.1 replica: delta == D0 exactly, CONFIG_KSU=y.
+- KEY DISCOVERY: savedefconfig OMITS promptless derived strings (DEFAULT_TCP_CONG,
+  ZRAM_DEF_COMP) — the old set_cfg append-at-EOF pattern (safe profile) can NEVER pass
+  check_defconfig; explains the historical safe-profile failures. v0.8 = canonical 3-line delta.
+- VERIFIED: v0.8 apply_tuning.sh produces exactly +CONFIG_DEFAULT_BBR=y (after TCP_CONG_BBR),
+  +CONFIG_ZRAM_DEF_COMP_ZSTD=y (after ZRAM=m), KFENCE_SAMPLE_INTERVAL 500->0; savedefconfig delta
+  == D0 byte-for-byte; .config effective: bbr default, zstd zram default, kfence interval 0, KSU=y.
+- build.yml: REL_VER/zip/kit -> v0.8; new ksun hard gate (5 values in built .config); STEP-2 hash
+  verification moved to CI-time injection (__BOOT_SHA256__/__WIFIZIP_SHA256__ placeholders +
+  gates) — kills the post-build hash-pin commit dance and any stale-hash kit.
+- flash-kit/ksun labels -> v0.8 (bat CRLF preserved); READ-ME-FIRST rewritten; module.prop v0.8-ksun.
+- Next: branch + PR (never push main), dispatch ksun CI on branch, monitor ~48min, record evidence.
