@@ -1,18 +1,22 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title S688LN v0.6 - STEP 2 FLASH plus WIFI FIX - this window stays open
+title S688LN v0.7.1-ksun - STEP 2 FLASH plus WIFI FIX - this window stays open
 color 0E
 echo ==============================================================
-echo   STEP 2 - v0.6: installs the WiFi-fix Magisk module, then
-echo   flashes the exact-stamp kernel - boot partition, slot a.
+echo   STEP 2 - v0.7.1-ksun: installs the WiFi-fix module, then
+echo   flashes the exact-stamp KernelSU kernel - boot, slot a.
 echo   Undo is always available: RESTORE-STOCK-v2.bat
 echo ==============================================================
 echo.
 
+set WIFIZIP=s688ln-wifi-fix-v0.7.1-ksun.zip
+set BOOTSHA=48a88d980dcfd429884bdda851064d597e8692b994f6077ed905d54449f7d2a5
+set ZIPSHA=67f38ca571c118ef0122a7b4dda456b190d773baf096caa1d79d2772bdb3b5dc
+
 if exist "platform-tools\fastboot.exe" goto have_tools
 echo *** PROBLEM: platform-tools\fastboot.exe not found.
-echo     Run me from inside the unzipped kit folder.
+echo     Run me from inside the unzipped v0.7.1 kit folder.
 goto the_end
 
 :have_tools
@@ -21,8 +25,10 @@ echo *** PROBLEM: boot.img not found in this folder.
 goto the_end
 
 :have_img
-if exist "s688ln-wifi-fix-v0.6.zip" goto have_mod
-echo *** PROBLEM: s688ln-wifi-fix-v0.6.zip not found in this folder.
+if exist "%WIFIZIP%" goto have_mod
+echo *** PROBLEM: %WIFIZIP% not found in this folder.
+echo     It ships inside the v0.7.1 kit zip. If you renamed it,
+echo     rename it back to exactly:  %WIFIZIP%
 goto the_end
 
 :have_mod
@@ -39,49 +45,56 @@ echo     Do NOT flash. Send a photo of this window to Viktor.
 goto the_end
 
 :verify_img
-echo Checking boot.img is not corrupted - takes a few seconds...
-if not exist "EXPECTED-SHA256.txt" goto hash_skip
-set EXPECT=
-set /p EXPECT=<EXPECTED-SHA256.txt
+echo Checking boot.img is really the v0.7.1 kernel - a few seconds...
 set GOTHASH=
 for /f "skip=1 tokens=1" %%h in ('certutil -hashfile boot.img SHA256') do if not defined GOTHASH set GOTHASH=%%h
-if /i "%GOTHASH%"=="%EXPECT%" goto hash_ok
-echo *** PROBLEM: boot.img failed its integrity check.
-echo     expected %EXPECT%
+if /i "%GOTHASH%"=="%BOOTSHA%" goto img_ok
+echo *** PROBLEM: this boot.img is NOT the v0.7.1-ksun kernel.
+echo     expected %BOOTSHA%
 echo     got      %GOTHASH%
-echo     Re-download the kit zip. Do NOT flash this file.
+echo     Wrong folder or an old kit. Use only the files from the
+echo     v0.7.1-ksun release. Do NOT flash this file.
 goto the_end
 
-:hash_skip
-echo NOTE: EXPECTED-SHA256.txt missing - skipping integrity check.
-goto install_mod
+:img_ok
+echo boot.img OK - genuine v0.7.1-ksun.
+echo Checking the WiFi-fix zip is from the SAME build...
+set GOTZIP=
+for /f "skip=1 tokens=1" %%h in ('certutil -hashfile "%WIFIZIP%" SHA256') do if not defined GOTZIP set GOTZIP=%%h
+if /i "%GOTZIP%"=="%ZIPSHA%" goto zip_ok
+echo *** PROBLEM: this WiFi-fix zip is NOT from the v0.7.1 build.
+echo     Kernel keys are per-build. A zip from another build is
+echo     exactly what killed WiFi and Bluetooth last time.
+echo     Do NOT continue. Re-download the v0.7.1 kit and use the
+echo     zip that comes inside it.
+goto the_end
 
-:hash_ok
-echo boot.img integrity OK.
-
-:install_mod
+:zip_ok
+echo WiFi-fix zip OK - matches the v0.7.1 build.
 echo.
 echo Phone: ON, unlocked, USB cable in, USB debugging ON.
 echo WATCH THE PHONE - tap ALLOW / GRANT if it asks.
 echo.
-echo --- Part A: installing the WiFi-fix module into Magisk ---
+echo --- Part A: installing the WiFi-fix module (Magisk or KernelSU) ---
 echo     This is staged only - it does nothing until the reboot,
 echo     and it does nothing at all on the stock kernel.
 platform-tools\adb.exe wait-for-device
-platform-tools\adb.exe push s688ln-wifi-fix-v0.6.zip /data/local/tmp/s688ln-wifi-fix-v0.6.zip > nul
-platform-tools\adb.exe shell su -c "magisk --install-module /data/local/tmp/s688ln-wifi-fix-v0.6.zip" > "%TEMP%\s688ln_modinst.txt" 2>&1
+platform-tools\adb.exe push "%WIFIZIP%" /data/local/tmp/%WIFIZIP% > nul
+platform-tools\adb.exe shell su -c "if [ -x /data/adb/ksud ]; then /data/adb/ksud module install /data/local/tmp/%WIFIZIP%; else magisk --install-module /data/local/tmp/%WIFIZIP%; fi" > "%TEMP%\s688ln_modinst.txt" 2>&1
 type "%TEMP%\s688ln_modinst.txt"
-findstr /i /c:"Done" "%TEMP%\s688ln_modinst.txt" >nul 2>&1
+platform-tools\adb.exe shell su -c "ls /data/adb/modules_update/s688ln_wifi_fix/module.prop /data/adb/modules/s688ln_wifi_fix/module.prop 2>/dev/null" > "%TEMP%\s688ln_modchk.txt" 2>&1
+findstr /c:"module.prop" "%TEMP%\s688ln_modchk.txt" >nul 2>&1
 if not errorlevel 1 goto mod_ok
 echo.
-echo *** PROBLEM: Magisk did not confirm the module install.
-echo     Did you tap GRANT on the Superuser popup?
-echo     Run me again and watch the phone screen.
+echo *** PROBLEM: the module did not land on the phone.
+echo     Did you tap GRANT on the root popup on the phone screen?
+echo     Run me again and watch the phone.
 echo     If it keeps failing, send a photo of this window to Viktor.
 goto the_end
 
 :mod_ok
-echo Magisk module staged OK.
+echo Module staged OK - it replaces any older s688ln_wifi_fix
+echo module automatically on the next reboot.
 echo.
 echo --- Part B: flashing the kernel ---
 echo Press any key to reboot the phone into FASTBOOTD...
@@ -131,10 +144,10 @@ echo     Send a photo of this window to Viktor on Slack.
 goto the_end
 
 :flash_ready
-echo Confirmed: FASTBOOTD. Ready to flash v0.6.
+echo Confirmed: FASTBOOTD. Ready to flash v0.7.1-ksun.
 echo.
 echo ==============================================================
-echo  Press any key to FLASH THE v0.6 KERNEL now.
+echo  Press any key to FLASH THE v0.7.1-ksun KERNEL now.
 echo  Or close this window to cancel - nothing written yet.
 echo ==============================================================
 pause >nul
@@ -156,10 +169,12 @@ pause >nul
 platform-tools\fastboot.exe reboot
 echo.
 echo ==============================================================
-echo  Phone is rebooting on the v0.6 kernel with the WiFi fix.
+echo  Phone is rebooting on the v0.7.1-ksun kernel + WiFi fix.
 echo  First boot can take a few minutes. When Android is up:
 echo    1. Try the WiFi switch. Try the Bluetooth switch.
-echo    2. Run STEP-3-TEST.bat - it checks everything and packs
+echo    2. Open the KernelSU Next app - it should say Working
+echo       and show version 33214.
+echo    3. Run STEP-3-TEST.bat - it checks everything and packs
 echo       the logs for Viktor, PASS or FAIL.
 echo  If the phone will NOT boot: RESTORE-STOCK-v2.bat brings
 echo  stock back in 2 minutes - you have done it before.

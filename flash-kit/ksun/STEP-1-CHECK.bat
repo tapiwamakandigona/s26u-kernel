@@ -1,10 +1,10 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title S688LN v0.6 - STEP 1 CHECK - read-only, writes NOTHING to the phone
+title S688LN v0.7.1-ksun - STEP 1 CHECK - read-only, writes NOTHING to the phone
 color 0B
 echo ==============================================================
-echo   STEP 1 - CHECK  v0.6   -- READ-ONLY, writes NOTHING.
+echo   STEP 1 - CHECK  v0.7.1-ksun   -- READ-ONLY, writes NOTHING.
 echo   This window never closes by itself.
 echo ==============================================================
 echo.
@@ -124,7 +124,7 @@ goto finish
 :gun_found
 echo   SMOKING GUN FOUND: the phone keeps its GKI modules in a
 echo   folder named after the exact kernel version string.
-echo   That is exactly what v0.6 fixes.
+echo   That is exactly what the WiFi-fix module fixes.
 
 :finish
 echo.
