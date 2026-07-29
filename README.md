@@ -1,5 +1,11 @@
 # S26U GKI kernel CI
 
+> ## 🆕 v0.8 (2026-07-29) — ksun + tier-A tuning baked IN
+> KernelSU-Next v3.3.0 in-kernel (v0.7.1, VERIFIED on-device) **plus** the
+> KernelBoost trio as kernel *factory defaults*: TCP **bbr**, zram **zstd**,
+> **KFENCE off** (value-of-default changes only → WiFi-safe CRCs). Research
+> base: [`docs/how-gki-kernels-work.md`](docs/how-gki-kernels-work.md).
+>
 > ## ✅ SOLVED — WiFi + Bluetooth WORKING on the custom kernel (v0.6, 2026-07-28)
 > Release [`v0.6-stock-run30394576840`](https://github.com/tapiwamakandigona/s26u-kernel/releases/tag/v0.6-stock-run30394576840)
 > boots to full Android with **WiFi and Bluetooth fully functional** — verified

@@ -70,11 +70,11 @@ jobs:
         run: |
           if [ "${{ inputs.profile }}" = "ksun" ]; then
             {
-              echo "REL_VER=v0.7.1"
+              echo "REL_VER=v0.8"
               echo "MODULE_SRC=flash-kit/ksun/module"
               echo "KIT_SRC=flash-kit/ksun"
-              echo "WIFIZIP=s688ln-wifi-fix-v0.7.1-ksun.zip"
-              echo "KIT=S688LN-kernel-v0.7.1-ksun"
+              echo "WIFIZIP=s688ln-wifi-fix-v0.8-ksun.zip"
+              echo "KIT=S688LN-kernel-v0.8-ksun"
             } >> "$GITHUB_ENV"
           else
             {
@@ -290,6 +290,36 @@ jobs:
             exit 1
           fi
 
+      - name: Verify v0.8 tier-A tuning landed (ksun hard gate)
+        if: ${{ inputs.profile == 'ksun' }}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          # The built .config must show all five EFFECTIVE v0.8 values:
+          # the two choice selectors, the two derived strings they compute,
+          # and KFENCE sampling off. Fails the build otherwise.
+          CFG="$(find android-kernel dist -name '.config' -type f 2>/dev/null | head -1)"
+          if [ -z "$CFG" ]; then
+            echo "::error::No built .config found; cannot verify v0.8 tuning. Aborting."
+            exit 1
+          fi
+          FAIL=0
+          for want in \
+            'CONFIG_DEFAULT_BBR=y' \
+            'CONFIG_DEFAULT_TCP_CONG="bbr"' \
+            'CONFIG_ZRAM_DEF_COMP_ZSTD=y' \
+            'CONFIG_ZRAM_DEF_COMP="zstd"' \
+            'CONFIG_KFENCE_SAMPLE_INTERVAL=0'
+          do
+            if grep -qxF "$want" "$CFG"; then
+              echo "PASS: $want"
+            else
+              echo "::error::MISSING in built .config: $want"
+              FAIL=1
+            fi
+          done
+          [ "$FAIL" = "0" ] || { echo "::error::v0.8 tier-A tuning gate FAILED."; exit 1; }
+          echo "v0.8 tier-A tuning confirmed in $CFG"
+
       - name: Verify kernel version string vs stock
         run: |
           cd "$GITHUB_WORKSPACE"
@@ -387,6 +417,18 @@ jobs:
           cp out/boot.img "$KIT/"
           cp $KIT_SRC/*.bat $KIT_SRC/*.txt "$KIT/"
           cp "$WIFIZIP" "$KIT/"
+          # v0.8: inject THIS build's real hashes into STEP-2 (placeholders in
+          # the repo copy). Removes the post-build "hash-pin" commit dance and
+          # guarantees the published kit's self-check matches its own contents.
+          BOOT_HASH="$(sha256sum out/boot.img | awk '{print $1}')"
+          ZIP_HASH="$(sha256sum "$WIFIZIP" | awk '{print $1}')"
+          sed -i "s/__BOOT_SHA256__/$BOOT_HASH/;s/__WIFIZIP_SHA256__/$ZIP_HASH/" "$KIT/STEP-2-FLASH.bat"
+          grep -q "$BOOT_HASH" "$KIT/STEP-2-FLASH.bat" || {
+            echo "::error::boot.img hash injection into STEP-2 failed."; exit 1; }
+          grep -q "$ZIP_HASH" "$KIT/STEP-2-FLASH.bat" || {
+            echo "::error::wifi-zip hash injection into STEP-2 failed."; exit 1; }
+          grep -q "set WIFIZIP=$WIFIZIP" "$KIT/STEP-2-FLASH.bat" || {
+            echo "::error::STEP-2 WIFIZIP label drifted from build WIFIZIP ($WIFIZIP)."; exit 1; }
           echo "STEP-1 puts your stock kernel backup here." > "$KIT/backup/READ-ME.txt"
           echo "STEP-3 puts logs for Viktor here." > "$KIT/logs/READ-ME.txt"
           echo "STEP-1 puts read-only check results for Viktor here." > "$KIT/check/READ-ME.txt"
@@ -417,7 +459,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           TAG="${REL_VER}-${{ inputs.profile }}-run${{ github.run_id }}"
           if [ "${{ inputs.profile }}" = "ksun" ]; then
-            NOTES="v0.7.1: fixes the KernelSU-Next manager 'version 1 too low' warning (Kleaf's hermetic sandbox strips .git so the Kbuild version detector fell back to 1; we now bake the real ${KSUN_TAG} version = ${KSU_CODE} into the build). Use the KernelSU-Next ${KSUN_TAG} manager APK (reports 33214). Exact-stamp kernel with KernelSU-Next ${KSUN_TAG} compiled IN (kprobe hooks, additive; root lives in the signed Image, init_boot untouched). Ships THIS build's OWN SIGNED rfkill.ko + usbnet family via a root-agnostic post-fs-data loader (Magisk OR KernelSU). CRITICAL: the module signing key is per-build, so you MUST use the boot.img and the wifi-fix zip FROM THIS SAME RELEASE together, and remove any older s688ln_wifi_fix module first (a stale zip from another run is rejected -> 'rfkill: exports protected symbol rfkill_alloc' -> no WiFi/BT). A/B: fastboot boot ONLY, verify KSU manager=Working + WiFi + BT + ~248 modules before flashing. Kit includes boot.img, the matched fix module zip, platform-tools, and parse-safe .bat steps."
+            NOTES="v0.8: everything v0.7.1 is (KernelSU-Next ${KSUN_TAG} compiled IN, version ${KSU_CODE}; exact-stamp GKI; this build's OWN SIGNED rfkill.ko + usbnet family via a root-agnostic loader) PLUS the tier-A tuning now baked into the kernel as FACTORY DEFAULTS instead of only runtime module writes: (1) default TCP congestion control bbr (was cubic), (2) default zram compressor zstd (was lzo-rle), (3) KFENCE sampling OFF by default (was 500ms). These are value-of-default changes only - no symbol/ABI/LTO change, so MODVERSIONS CRCs stay byte-identical to stock and the vendor WiFi/BT modules are unaffected (KMI strict mode stayed ON for this build). Your S26U-Flow/KernelBoost module keeps working unchanged - its runtime writes now simply confirm the same values. CRITICAL (unchanged): the module signing key is per-build, so use the boot.img and the wifi-fix zip FROM THIS SAME RELEASE together and remove any older s688ln_wifi_fix module first (a stale zip from another run is rejected -> 'rfkill: exports protected symbol rfkill_alloc' -> no WiFi/BT). STEP-2 now verifies its own hashes - injected at build time. A/B: fastboot boot ONLY, verify KSU manager=Working + WiFi + BT + ~248 modules before flashing. Kit includes boot.img, the matched fix module zip, platform-tools, and parse-safe .bat steps."
           else
             NOTES="Exact-stamp kernel + this build's OWN SIGNED GKI modules (rfkill & USB-net family) auto-loaded by a Magisk module. Fixes the v0.5 finding: kernel rejected Google-signed rfkill.ko ('exports protected symbol rfkill_alloc' -> EPERM), killing the whole WiFi/BT chain. Kit zip includes boot.img, the Magisk fix zip, platform-tools, and the parse-safe .bat steps."
           fi

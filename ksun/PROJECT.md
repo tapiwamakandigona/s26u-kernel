@@ -41,3 +41,24 @@ that bans the `aggressive`/ThinLTO profile).
 ## Definition of done
 See features.json. Ultimate on-device gate stays with the owner: `fastboot boot`
 (fastbootd) → root works (KSU manager) + WiFi + BT + 248 modules. Never flash blind.
+
+## v0.8 — tier-A config defaults baked in (2026-07-29)
+The KernelBoost runtime trio becomes kernel factory defaults (ksun profile):
+`CONFIG_DEFAULT_BBR=y` (TCP cubic→bbr), `CONFIG_ZRAM_DEF_COMP_ZSTD=y`
+(lzo-rle→zstd), `CONFIG_KFENCE_SAMPLE_INTERVAL=500→0` (KFENCE off from boot,
+code stays built-in). Value-of-default changes only → MODVERSIONS CRCs
+byte-identical to stock → vendor WiFi/BT unaffected (KMI strict mode stays ON
+as the in-CI CRC gate). Device has run these values via the module since
+2026-07-22 (VERIFIED), so on-device behavior is unchanged — defaults just
+apply from boot. Research base + plain-English explainer:
+`docs/how-gki-kernels-work.md`.
+
+Hard-won config-gate rules (VERIFIED locally against pinned tree 1481f357a31c
+with real `make savedefconfig`, before push):
+- `check_defconfig` byte-compares the file to savedefconfig's canonical form.
+- savedefconfig OMITS promptless derived strings → never write
+  `CONFIG_DEFAULT_TCP_CONG` / `CONFIG_ZRAM_DEF_COMP` (extra line = gate fail).
+- Canonical positions: `DEFAULT_BBR` after `CONFIG_TCP_CONG_BBR=y`;
+  `ZRAM_DEF_COMP_ZSTD` after `CONFIG_ZRAM=m`; KFENCE interval = in-place
+  value change. The old `set_cfg` append-at-EOF pattern can never pass.
+- New CI hard gate: built `.config` must contain all five effective values.

@@ -1,22 +1,22 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title S688LN v0.7.1-ksun - STEP 2 FLASH plus WIFI FIX - this window stays open
+title S688LN v0.8-ksun - STEP 2 FLASH plus WIFI FIX - this window stays open
 color 0E
 echo ==============================================================
-echo   STEP 2 - v0.7.1-ksun: installs the WiFi-fix module, then
+echo   STEP 2 - v0.8-ksun: installs the WiFi-fix module, then
 echo   flashes the exact-stamp KernelSU kernel - boot, slot a.
 echo   Undo is always available: RESTORE-STOCK-v2.bat
 echo ==============================================================
 echo.
 
-set WIFIZIP=s688ln-wifi-fix-v0.7.1-ksun.zip
-set BOOTSHA=48a88d980dcfd429884bdda851064d597e8692b994f6077ed905d54449f7d2a5
-set ZIPSHA=67f38ca571c118ef0122a7b4dda456b190d773baf096caa1d79d2772bdb3b5dc
+set WIFIZIP=s688ln-wifi-fix-v0.8-ksun.zip
+set BOOTSHA=__BOOT_SHA256__
+set ZIPSHA=__WIFIZIP_SHA256__
 
 if exist "platform-tools\fastboot.exe" goto have_tools
 echo *** PROBLEM: platform-tools\fastboot.exe not found.
-echo     Run me from inside the unzipped v0.7.1 kit folder.
+echo     Run me from inside the unzipped v0.8 kit folder.
 goto the_end
 
 :have_tools
@@ -27,7 +27,7 @@ goto the_end
 :have_img
 if exist "%WIFIZIP%" goto have_mod
 echo *** PROBLEM: %WIFIZIP% not found in this folder.
-echo     It ships inside the v0.7.1 kit zip. If you renamed it,
+echo     It ships inside the v0.8 kit zip. If you renamed it,
 echo     rename it back to exactly:  %WIFIZIP%
 goto the_end
 
@@ -45,32 +45,32 @@ echo     Do NOT flash. Send a photo of this window to Viktor.
 goto the_end
 
 :verify_img
-echo Checking boot.img is really the v0.7.1 kernel - a few seconds...
+echo Checking boot.img is really the v0.8 kernel - a few seconds...
 set GOTHASH=
 for /f "skip=1 tokens=1" %%h in ('certutil -hashfile boot.img SHA256') do if not defined GOTHASH set GOTHASH=%%h
 if /i "%GOTHASH%"=="%BOOTSHA%" goto img_ok
-echo *** PROBLEM: this boot.img is NOT the v0.7.1-ksun kernel.
+echo *** PROBLEM: this boot.img is NOT the v0.8-ksun kernel.
 echo     expected %BOOTSHA%
 echo     got      %GOTHASH%
 echo     Wrong folder or an old kit. Use only the files from the
-echo     v0.7.1-ksun release. Do NOT flash this file.
+echo     v0.8-ksun release. Do NOT flash this file.
 goto the_end
 
 :img_ok
-echo boot.img OK - genuine v0.7.1-ksun.
+echo boot.img OK - genuine v0.8-ksun.
 echo Checking the WiFi-fix zip is from the SAME build...
 set GOTZIP=
 for /f "skip=1 tokens=1" %%h in ('certutil -hashfile "%WIFIZIP%" SHA256') do if not defined GOTZIP set GOTZIP=%%h
 if /i "%GOTZIP%"=="%ZIPSHA%" goto zip_ok
-echo *** PROBLEM: this WiFi-fix zip is NOT from the v0.7.1 build.
+echo *** PROBLEM: this WiFi-fix zip is NOT from the v0.8 build.
 echo     Kernel keys are per-build. A zip from another build is
 echo     exactly what killed WiFi and Bluetooth last time.
-echo     Do NOT continue. Re-download the v0.7.1 kit and use the
+echo     Do NOT continue. Re-download the v0.8 kit and use the
 echo     zip that comes inside it.
 goto the_end
 
 :zip_ok
-echo WiFi-fix zip OK - matches the v0.7.1 build.
+echo WiFi-fix zip OK - matches the v0.8 build.
 echo.
 echo Phone: ON, unlocked, USB cable in, USB debugging ON.
 echo WATCH THE PHONE - tap ALLOW / GRANT if it asks.
@@ -144,10 +144,10 @@ echo     Send a photo of this window to Viktor on Slack.
 goto the_end
 
 :flash_ready
-echo Confirmed: FASTBOOTD. Ready to flash v0.7.1-ksun.
+echo Confirmed: FASTBOOTD. Ready to flash v0.8-ksun.
 echo.
 echo ==============================================================
-echo  Press any key to FLASH THE v0.7.1-ksun KERNEL now.
+echo  Press any key to FLASH THE v0.8-ksun KERNEL now.
 echo  Or close this window to cancel - nothing written yet.
 echo ==============================================================
 pause >nul
@@ -169,7 +169,7 @@ pause >nul
 platform-tools\fastboot.exe reboot
 echo.
 echo ==============================================================
-echo  Phone is rebooting on the v0.7.1-ksun kernel + WiFi fix.
+echo  Phone is rebooting on the v0.8-ksun kernel + WiFi fix.
 echo  First boot can take a few minutes. When Android is up:
 echo    1. Try the WiFi switch. Try the Bluetooth switch.
 echo    2. Open the KernelSU Next app - it should say Working

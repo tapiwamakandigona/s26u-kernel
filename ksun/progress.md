@@ -96,3 +96,54 @@
 - Naming bumped to v0.7.1 (REL_VER + WIFIZIP + KIT) so the new release/keys are unambiguous vs v0.7.
 - Next: commit, push, trigger ksun CI, monitor, record evidence; then owner: fastboot boot new boot.img +
   install matched v0.7.1 wifi-fix zip + v3.3.0 manager APK.
+
+## Iteration 5 — 2026-07-29 ~21:30 UTC — v0.8: tier-A defaults baked into the kernel (Viktor)
+- Owner directive: "do thorough research on how kernels are made n work, then make the kernel
+  update, no errors, be autonomous." Read harness v3.0.1 (subagent-toolkit tag) — single agent, evidence-first.
+- RESEARCH (all VERIFIED against primary sources, write-up: docs/how-gki-kernels-work.md):
+  GKI/KMI/module-signing model (source.android.com), BBR-vs-cubic on lossy/satellite links
+  (arXiv:2607.07133 Starlink study; WPI testbed), zstd-vs-lzo-rle zram (LWN 973757), KFENCE
+  default-off semantics (lib/Kconfig.kfence help text at pinned SHA).
+- PINNED-SOURCE FACTS (1481f357a31c, fetched from android.googlesource): stock gki_defconfig has
+  TCP_CONG_BBR=y:163, CRYPTO_ZSTD=y:741, ZRAM=m:331, KFENCE_SAMPLE_INTERVAL=500:777; choice
+  defaults are DEFAULT_CUBIC and ZRAM_DEF_COMP_LZORLE.
+- LOCAL RIG (no CI guessing): downloaded the full pinned tree tarball, built flex/bison/m4 from
+  source, replicated KSU setup.sh wiring (v3.3.0 clone). Pristine savedefconfig vs committed file
+  = 8 toolchain-gated omissions (baseline D0; Kleaf's clang env has them all — CI-green v0.7.1
+  proves it). ksun v0.7.1 replica: delta == D0 exactly, CONFIG_KSU=y.
+- KEY DISCOVERY: savedefconfig OMITS promptless derived strings (DEFAULT_TCP_CONG,
+  ZRAM_DEF_COMP) — the old set_cfg append-at-EOF pattern (safe profile) can NEVER pass
+  check_defconfig; explains the historical safe-profile failures. v0.8 = canonical 3-line delta.
+- VERIFIED: v0.8 apply_tuning.sh produces exactly +CONFIG_DEFAULT_BBR=y (after TCP_CONG_BBR),
+  +CONFIG_ZRAM_DEF_COMP_ZSTD=y (after ZRAM=m), KFENCE_SAMPLE_INTERVAL 500->0; savedefconfig delta
+  == D0 byte-for-byte; .config effective: bbr default, zstd zram default, kfence interval 0, KSU=y.
+- build.yml: REL_VER/zip/kit -> v0.8; new ksun hard gate (5 values in built .config); STEP-2 hash
+  verification moved to CI-time injection (__BOOT_SHA256__/__WIFIZIP_SHA256__ placeholders +
+  gates) — kills the post-build hash-pin commit dance and any stale-hash kit.
+- flash-kit/ksun labels -> v0.8 (bat CRLF preserved); READ-ME-FIRST rewritten; module.prop v0.8-ksun.
+- Next: branch + PR (never push main), dispatch ksun CI on branch, monitor ~48min, record evidence.
+
+## Iteration 6 — 2026-07-29 ~22:15 UTC — self-review catch: tuning gate was missing (Viktor)
+- Run 30492435675 (commit 4952db2) went GREEN: check_defconfig passed with the 3-line delta,
+  apply-step log shows the exact defconfig diff, hash injection executed, release
+  v0.8-ksun-run30492435675 published with kit + wifi zip + SHA256SUMS.
+- BUT post-CI step-list audit showed the promised "Verify v0.8 tier-A tuning landed" gate was
+  NOT in the committed build.yml (lost between local drafting and commit). Evidence rule: claims
+  need the gate to actually run. Added the step (5 exact-line greps on the built .config,
+  hard-fails), YAML-validated, pushed as commit 2 on the PR branch; re-dispatching ksun CI.
+- The superseded release will be deleted once the gated run is green, so only ONE v0.8 release
+  exists (same-release pairing rule stays unambiguous for the owner).
+
+## Iteration 7 — 2026-07-29 ~23:00 UTC — v0.8 CI green WITH the tuning gate (Viktor)
+- Run 30495119422 (commit 7241875) completed SUCCESS (~47m). New gate step
+  "Verify v0.8 tier-A tuning landed (ksun hard gate)" ran and logged PASS for all 5 lines:
+  CONFIG_DEFAULT_BBR=y, CONFIG_DEFAULT_TCP_CONG="bbr", CONFIG_ZRAM_DEF_COMP_ZSTD=y,
+  CONFIG_ZRAM_DEF_COMP="zstd", CONFIG_KFENCE_SAMPLE_INTERVAL=0 → "v0.8 tier-A tuning confirmed".
+  KSU gate, release-string gate, signed-modules gate all PASS as before.
+- Release v0.8-ksun-run30495119422 published: S688LN-kernel-v0.8-ksun.zip (23.1 MB) +
+  s688ln-wifi-fix-v0.8-ksun.zip + SHA256SUMS.txt.
+- Superseded pre-gate release v0.8-ksun-run30492435675 DELETED (tag cleaned up) so exactly one
+  v0.8 release exists; same-release boot.img/wifi-zip pairing stays unambiguous.
+- features.json: v08-ci-green -> passes:true with run/gate/release evidence.
+- Remaining gates are OWNER-only: v08-on-device-verified (fastboot boot, KSU Working + WiFi + BT
+  + ~248 modules; defaults show bbr/zstd/kfence=0 with no module writes). PR #2 merge = owner call.
