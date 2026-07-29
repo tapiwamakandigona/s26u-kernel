@@ -96,3 +96,23 @@
 - Naming bumped to v0.7.1 (REL_VER + WIFIZIP + KIT) so the new release/keys are unambiguous vs v0.7.
 - Next: commit, push, trigger ksun CI, monitor, record evidence; then owner: fastboot boot new boot.img +
   install matched v0.7.1 wifi-fix zip + v3.3.0 manager APK.
+
+## Iteration 5 — 2026-07-29 ~22:30 CAT — v0.7.1 CONFIRMED on-device; Magisk removed (Viktor)
+- OWNER report + evidence zip/screenshots: v0.7.1 ksun kernel running, **Magisk fully uninstalled**,
+  KSU-Next is the only root manager. Evidence committed to `evidence/S688LN-2026-07-29/`.
+- VERIFIED from the owner's gather zip (timestamps 07-29 22:31 CAT => this boot):
+  - `uname` = `6.6.102-android15-8-g1481f357a31c-dirty-ab14794947-4k` — byte-identical to CI run
+    30405396108's logged release string => the booted image is ours.
+  - `lsmod` = **248 modules (exactly stock)**; `rfkill 36864 2 sprdbt_tty,cfg80211`,
+    `cfg80211 1114112 1 sprd_wlan_combo`, `unisoc_wcn_bsp … 4 …` => same-run signed rfkill.ko accepted.
+  - `wlan0 … state UP`; WiFi + BT switch states `1`/`1`; SELinux **Enforcing**.
+  - logcat tail: zero `magisk`/`zygisk` hits; `com.rifsxd.ksunext` in the foreground.
+- KSU manager: **Working / BUILT-IN (GKI2), v3.3.0 (33214-2)**, Modules 5, Superuser 0
+  => the iteration-4 `KSU_VERSION_FALLBACK := 33214` Kbuild patch is confirmed working on-device.
+- features.json: `on-device-verified` flipped to **passes:true**. All ksun features now pass.
+- Corrections: manager reports **Hook mode: Tracepoint** (PROJECT.md said kprobe — update the doc);
+  README's "keep Magisk for root" bullet removed as obsolete.
+- Gaps: gather script's `fix_module_*` logs came back `su: inaccessible or not found` (no KSU superuser
+  grant for the shell — Superuser 0), so no dmesg/module log this round; `Metamodule status: Not installed`
+  (informational, modules mount fine); no SUSFS => userspace-only root hiding.
+- Next candidate: **v0.8 `ksun-susfs` profile** (SUSFS patches for real mount/uname hiding), pending owner go-ahead.

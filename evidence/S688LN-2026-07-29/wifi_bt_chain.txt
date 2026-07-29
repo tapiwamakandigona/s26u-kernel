@@ -1,0 +1,6 @@
+# WiFi/BT module chain (from lsmod, 248 modules = stock count)
+sprdbt_tty             65536  2 
+sprd_wlan_combo       618496  0 
+cfg80211             1114112  1 sprd_wlan_combo
+rfkill                 36864  2 sprdbt_tty,cfg80211
+unisoc_wcn_bsp        540672  4 sprdbt_tty,sprd_wlan_combo,sprd_fm,unisoc_gnss_common_ctl_all
