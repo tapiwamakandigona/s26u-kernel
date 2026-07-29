@@ -133,3 +133,17 @@
   hard-fails), YAML-validated, pushed as commit 2 on the PR branch; re-dispatching ksun CI.
 - The superseded release will be deleted once the gated run is green, so only ONE v0.8 release
   exists (same-release pairing rule stays unambiguous for the owner).
+
+## Iteration 7 — 2026-07-29 ~23:00 UTC — v0.8 CI green WITH the tuning gate (Viktor)
+- Run 30495119422 (commit 7241875) completed SUCCESS (~47m). New gate step
+  "Verify v0.8 tier-A tuning landed (ksun hard gate)" ran and logged PASS for all 5 lines:
+  CONFIG_DEFAULT_BBR=y, CONFIG_DEFAULT_TCP_CONG="bbr", CONFIG_ZRAM_DEF_COMP_ZSTD=y,
+  CONFIG_ZRAM_DEF_COMP="zstd", CONFIG_KFENCE_SAMPLE_INTERVAL=0 → "v0.8 tier-A tuning confirmed".
+  KSU gate, release-string gate, signed-modules gate all PASS as before.
+- Release v0.8-ksun-run30495119422 published: S688LN-kernel-v0.8-ksun.zip (23.1 MB) +
+  s688ln-wifi-fix-v0.8-ksun.zip + SHA256SUMS.txt.
+- Superseded pre-gate release v0.8-ksun-run30492435675 DELETED (tag cleaned up) so exactly one
+  v0.8 release exists; same-release boot.img/wifi-zip pairing stays unambiguous.
+- features.json: v08-ci-green -> passes:true with run/gate/release evidence.
+- Remaining gates are OWNER-only: v08-on-device-verified (fastboot boot, KSU Working + WiFi + BT
+  + ~248 modules; defaults show bbr/zstd/kfence=0 with no module writes). PR #2 merge = owner call.

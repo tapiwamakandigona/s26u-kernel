@@ -65,8 +65,8 @@
     {
       "id": "v08-ci-green",
       "desc": "workflow_dispatch ksun build on the v0.8 branch completes success incl. the new tuning gate; release v0.8-ksun published.",
-      "passes": false,
-      "evidence": "Run 30492435675 green end-to-end on 4952db2 (check_defconfig passed WITH the 3-line delta; apply-step diff shows +DEFAULT_BBR/+ZRAM_DEF_COMP_ZSTD/KFENCE 500->0; release v0.8-ksun-run30492435675 published). Re-running with the tuning gate included for full evidence."
+      "passes": true,
+      "evidence": "VERIFIED run 30495119422 (head 7241875, incl. the tuning gate): conclusion=success in ~47m; gate step 'Verify v0.8 tier-A tuning landed (ksun hard gate)' logged PASS for all 5 lines (CONFIG_DEFAULT_BBR=y, CONFIG_DEFAULT_TCP_CONG=\"bbr\", CONFIG_ZRAM_DEF_COMP_ZSTD=y, CONFIG_ZRAM_DEF_COMP=\"zstd\", CONFIG_KFENCE_SAMPLE_INTERVAL=0) + 'v0.8 tier-A tuning confirmed'; KSU gate PASS; release v0.8-ksun-run30495119422 published (kit 23.1MB + wifi-fix zip + SHA256SUMS). Superseded pre-gate release v0.8-ksun-run30492435675 deleted so exactly one v0.8 release exists."
     },
     {
       "id": "v08-on-device-verified",
